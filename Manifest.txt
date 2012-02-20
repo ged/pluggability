@@ -1,5 +1,3 @@
-.irbrc
-.testrb
 ChangeLog
 History.rdoc
 Manifest.txt
