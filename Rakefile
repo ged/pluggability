@@ -24,3 +24,5 @@ end
 
 ENV['VERSION'] ||= hoespec.spec.version.to_s
 
+task 'hg:precheckin' => [ :check_history, :check_manifest, :spec ]
+
