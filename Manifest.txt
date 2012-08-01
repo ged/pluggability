@@ -3,6 +3,6 @@ History.rdoc
 Manifest.txt
 README.rdoc
 Rakefile
-lib/pluginfactory.rb
+lib/pluggability.rb
 spec/lib/helpers.rb
-spec/pluginfactory_spec.rb
+spec/pluggability_spec.rb
