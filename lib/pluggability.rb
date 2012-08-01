@@ -1,164 +1,27 @@
 #!/usr/bin/env ruby -w
 
-require 'logger'
+require 'loggability' unless defined?( Loggability )
 
-### An exception class for PluginFactory specific errors.
+
+### An exception class for Pluggability specific errors.
 class FactoryError < RuntimeError; end
 
-# This module contains the PluginFactory mixin. Including PluginFactory in your
-# class turns it into a factory for its derivatives, capable of searching for
-# and loading them by name. This is useful when you have an abstract base class
-# which defines an interface and basic functionality for a part of a larger
-# system, and a collection of subclasses which implement the interface for
-# different underlying functionality.
-#
-# An example of where this might be useful is in a program which talks to a
-# database. To avoid coupling it to a specific database, you use a Driver class
-# which encapsulates your program's interaction with the database behind a
-# useful interface. Now you can create a concrete implementation of the Driver
-# class for each kind of database you wish to talk to. If you make the base
-# Driver class a PluginFactory, too, you can add new drivers simply by dropping
-# them in a directory and using the Driver's <tt>create</tt> method to
-# instantiate them:
-#
-# == Creation Argument Variants
-#
-# The +create+ class method added to your class by PluginFactory searches for your module using
-#
-# == Synopsis
-#
-# in driver.rb:
-#
-#	require "PluginFactory"
-#
-#	class Driver
-#		include PluginFactory
-#		def self::derivative_dirs
-#		   ["drivers"]
-#		end
-#	end
-#
-# in drivers/mysql.rb:
-#
-#	require 'driver'
-#
-#	class MysqlDriver < Driver
-#		...implementation...
-#	end
-#
-# in /usr/lib/ruby/1.8/PostgresDriver.rb:
-#
-#	require 'driver'
-#
-#	class PostgresDriver < Driver
-#		...implementation...
-#	end
-#
-# elsewhere
-#
-#	require 'driver'
-#
-#	config[:driver_type] #=> "mysql"
-#	driver = Driver.create( config[:driver_type] )
-#	driver.class #=> MysqlDriver
-#	pgdriver = Driver.create( "PostGresDriver" )
-#
-# == Authors
-#
-# * Martin Chase <stillflame@FaerieMUD.org>
-# * Michael Granger <ged@FaerieMUD.org>
-#
-# == License
-#
-# Copyright (c) 2008-2012 Michael Granger and Martin Chase
-# All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met:
-#
-#   * Redistributions of source code must retain the above copyright notice,
-#     this list of conditions and the following disclaimer.
-#
-#   * Redistributions in binary form must reproduce the above copyright notice,
-#     this list of conditions and the following disclaimer in the documentation
-#     and/or other materials provided with the distribution.
-#
-#   * Neither the name of the author/s, nor the names of the project's
-#     contributors may be used to endorse or promote products derived from this
-#     software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
-# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
-module PluginFactory
+# The Pluggability module
+module Pluggability
+	extend Loggability
+
+
+	# Loggability API -- Set up a logger
+	log_as :pluggability
+
 
 	# Library version
-	VERSION = '1.0.8'
-
-
-	### Logging
-	@default_logger = Logger.new( $stderr )
-	@default_logger.level = $DEBUG ? Logger::DEBUG : Logger::WARN
-
-	@logger = @default_logger
-
-
-	class << self
-		# The logger that will be used when the logging subsystem is reset
-		attr_accessor :default_logger
-
-		# The logger that's currently in effect
-		attr_accessor :logger
-		alias_method :log, :logger
-		alias_method :log=, :logger=
-	end
-
-
-	### Deprecated: use the Logger object at #log to manipulate logging instead of this
-	### method.
-	def self::logger_callback=( callback )
-		if callback.nil?
-			self.logger.formatter = nil
-		else
-			self.logger.formatter = lambda {|lvl, _, _, msg|
-				callback.call(lvl.downcase.to_sym, msg)
-				''
-			}
-		end
-	end
-
-
-	### Reset the global logger object to the default
-	def self::reset_logger
-		self.logger = self.default_logger
-		self.logger.level = Logger::WARN
-	end
-
-
-	### Returns +true+ if the global logger has not been set to something other than
-	### the default one.
-	def self::using_default_logger?
-		return self.logger == self.default_logger
-	end
-
-
-	### Inclusion callback -- extends the including class. This is here so you can
-	### either 'include' or 'extend'.
-	def self::included( klass )
-		klass.extend( self )
-	end
+	VERSION = '0.0.1'
 
 
 	### Add the @derivatives instance variable to including classes.
 	def self::extend_object( obj )
+		obj.instance_variable_set( :@plugin_prefixes, [] )
 		obj.instance_variable_set( :@derivatives, {} )
 		super
 	end
@@ -167,6 +30,21 @@ module PluginFactory
 	#############################################################
 	###	M I X I N   M E T H O D S
 	#############################################################
+
+	### Get/set the prefixes that will be used when searching for particular plugins
+	### for the calling Class.
+	def plugin_prefixes( *args )
+		@plugin_prefixes.replace( args ) if !args.empty?
+		return @plugin_prefixes
+	end
+
+
+	### Set the prefixes that will be used when searching for particular plugins
+	### for the calling Class.
+	def plugin_prefixes=( args )
+		@plugin_prefixes = Array( args )
+	end
+
 
 	### Return the Hash of derivative classes, keyed by various versions of
 	### the class name.
@@ -200,7 +78,6 @@ module PluginFactory
 			return base.name
 		end
 	end
-	alias_method :factoryType, :factory_type
 
 
 	### Inheritance callback -- Register subclasses in the derivatives hash
@@ -214,18 +91,18 @@ module PluginFactory
 			keys << simple_name << simple_name.downcase
 
 			# Handle class names like 'FooBar' for 'Bar' factories.
-			PluginFactory.log.debug "Inherited %p for %p-type plugins" % [ subclass, self.factory_type ]
+			Pluggability.logger.debug "Inherited %p for %p-type plugins" % [ subclass, self.factory_type ]
 			if subclass.name.match( /(?:.*::)?(\w+)(?:#{self.factory_type})/i )
 				keys << Regexp.last_match[1].downcase
 			else
 				keys << subclass.name.sub( /.*::/, '' ).downcase
 			end
 		else
-			PluginFactory.log.debug "  no name-based variants for anonymous subclass %p" % [ subclass ]
+			Pluggability.logger.debug "  no name-based variants for anonymous subclass %p" % [ subclass ]
 		end
 
 		keys.compact.uniq.each do |key|
-			PluginFactory.log.info "Registering %s derivative of %s as %p" %
+			Pluggability.logger.info "Registering %s derivative of %s as %p" %
 				[ subclass.name, self.name, key ]
 			self.derivatives[ key ] = subclass
 		end
@@ -238,7 +115,6 @@ module PluginFactory
 	def derivative_classes
 		self.derivatives.values.uniq
 	end
-	alias_method :derivativeClasses, :derivative_classes
 
 
 	### Given the <tt>class_name</tt> of the class to instantiate, and other
@@ -293,7 +169,6 @@ module PluginFactory
 
 		return self.derivatives[ class_name.downcase ]
 	end
-	alias_method :getSubclass, :get_subclass
 
 
 	### Calculates an appropriate filename for the derived class using the
@@ -306,7 +181,7 @@ module PluginFactory
 	### require line is tried with both <tt>'foo/'</tt> and <tt>'bar/'</tt>
 	### prepended to it.
 	def load_derivative( class_name )
-		PluginFactory.log.debug "Loading derivative #{class_name}"
+		Pluggability.logger.debug "Loading derivative #{class_name}"
 
 		# Get the unique part of the derived class name and try to
 		# load it from one of the derivative subdirs, if there are
@@ -322,11 +197,10 @@ module PluginFactory
 				self.factory_type,
 				class_name.downcase,
 			]
-			PluginFactory.log.error( errmsg )
+			Pluggability.logger.error( errmsg )
 			raise FactoryError, errmsg, caller(3)
 		end
 	end
-	alias_method :loadDerivative, :load_derivative
 
 
 	### Build and return the unique part of the given <tt>class_name</tt>
@@ -342,37 +216,23 @@ module PluginFactory
 
 		return mod_name
 	end
-	alias_method :getModuleName, :get_module_name
 
 
-	### If the factory responds to the #derivative_dirs method, call
-	### it and use the returned array as a list of directories to
-	### search for the module with the specified <tt>mod_name</tt>.
+	### Search for the module with the specified <tt>mod_name</tt>, using any
+	### #plugin_prefixes that have been set.
 	def require_derivative( mod_name )
 
-		# See if we have a list of special subdirs that derivatives
-		# live in
-		if ( self.respond_to?(:derivative_dirs) )
-			subdirs = self.derivative_dirs
-
-		elsif ( self.respond_to?(:derivativeDirs) )
-			subdirs = self.derivativeDirs
-
-		# If not, just try requiring it from $LOAD_PATH
-		else
-			subdirs = ['']
-		end
-
-		subdirs = [ subdirs ] unless subdirs.is_a?( Array )
-		PluginFactory.log.debug "Subdirs are: %p" % [subdirs]
+		subdirs = self.plugin_prefixes
+		subdirs << '' if subdirs.empty?
+		Pluggability.logger.debug "Subdirs are: %p" % [subdirs]
 		fatals = []
 		tries  = []
 
 		# Iterate over the subdirs until we successfully require a
 		# module.
-		subdirs.collect {|dir| dir.strip}.each do |subdir|
+		subdirs.map( &:strip ).each do |subdir|
 			self.make_require_path( mod_name, subdir ).each do |path|
-				PluginFactory.log.debug "Trying #{path}..."
+				Pluggability.logger.debug "Trying #{path}..."
 				tries << path
 
 				# Try to require the module, saving errors and jumping
@@ -380,20 +240,20 @@ module PluginFactory
 				begin
 					require( path.untaint )
 				rescue LoadError => err
-					PluginFactory.log.debug "No module at '%s', trying the next alternative: '%s'" %
+					Pluggability.logger.debug "No module at '%s', trying the next alternative: '%s'" %
 						[ path, err.message ]
 				rescue Exception => err
 					fatals << err
-					PluginFactory.log.error "Found '#{path}', but encountered an error: %s\n\t%s" %
+					Pluggability.logger.error "Found '#{path}', but encountered an error: %s\n\t%s" %
 						[ err.message, err.backtrace.join("\n\t") ]
 				else
-					PluginFactory.log.info "Loaded '#{path}' without error."
+					Pluggability.logger.info "Loaded '#{path}' without error."
 					return path
 				end
 			end
 		end
 
-		PluginFactory.log.debug "fatals = %p" % [ fatals ]
+		Pluggability.logger.debug "fatals = %p" % [ fatals ]
 
 		# Re-raise is there was a file found, but it didn't load for
 		# some reason.
@@ -403,14 +263,13 @@ module PluginFactory
 				mod_name,
 				tries
 			  ]
-			PluginFactory.log.error( errmsg )
+			Pluggability.logger.error( errmsg )
 			raise FactoryError, errmsg
 		else
-			PluginFactory.log.debug "Re-raising first fatal error"
+			Pluggability.logger.debug "Re-raising first fatal error"
 			Kernel.raise( fatals.first )
 		end
 	end
-	alias_method :requireDerivative, :require_derivative
 
 
 	### Make a list of permutations of the given +modname+ for the given
@@ -438,9 +297,8 @@ module PluginFactory
 			path.collect! {|m| File.join(subdir, m)}
 		end
 
-		PluginFactory.log.debug "Path is: #{path.uniq.reverse.inspect}..."
+		Pluggability.logger.debug "Path is: #{path.uniq.reverse.inspect}..."
 		return path.uniq.reverse
 	end
-	alias_method :makeRequirePath, :make_require_path
 
 end # module Factory
