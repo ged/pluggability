@@ -3,20 +3,20 @@
 require 'loggability' unless defined?( Loggability )
 
 
-### An exception class for Pluggability specific errors.
-class FactoryError < RuntimeError; end
-
 # The Pluggability module
 module Pluggability
 	extend Loggability
 
-
-	# Loggability API -- Set up a logger
+	# Loggability API -- Set up a logger.
 	log_as :pluggability
 
 
 	# Library version
 	VERSION = '0.0.1'
+
+
+	### An exception class for Pluggability specific errors.
+	class FactoryError < RuntimeError; end
 
 
 	### Add the @derivatives instance variable to including classes.
@@ -91,18 +91,18 @@ module Pluggability
 			keys << simple_name << simple_name.downcase
 
 			# Handle class names like 'FooBar' for 'Bar' factories.
-			Pluggability.logger.debug "Inherited %p for %p-type plugins" % [ subclass, self.factory_type ]
+			Pluggability.log.debug "Inherited %p for %p-type plugins" % [ subclass, self.factory_type ]
 			if subclass.name.match( /(?:.*::)?(\w+)(?:#{self.factory_type})/i )
 				keys << Regexp.last_match[1].downcase
 			else
 				keys << subclass.name.sub( /.*::/, '' ).downcase
 			end
 		else
-			Pluggability.logger.debug "  no name-based variants for anonymous subclass %p" % [ subclass ]
+			Pluggability.log.debug "  no name-based variants for anonymous subclass %p" % [ subclass ]
 		end
 
 		keys.compact.uniq.each do |key|
-			Pluggability.logger.info "Registering %s derivative of %s as %p" %
+			Pluggability.log.info "Registering %s derivative of %s as %p" %
 				[ subclass.name, self.name, key ]
 			self.derivatives[ key ] = subclass
 		end
@@ -171,6 +171,40 @@ module Pluggability
 	end
 
 
+	### Find and load all derivatives of this class, using plugin_prefixes if any
+	### are defined, or a pattern derived from the #factory_type if not. Returns
+	### an array of all derivative classes. Load failures are logged but otherwise
+	### ignored.
+	def load_all
+		patterns = []
+		prefixes = self.plugin_prefixes
+
+		if prefixes && !prefixes.empty?
+			Pluggability.log.debug "Using plugin prefixes (%p) to build load patterns." % [ prefixes ]
+			prefixes.each do |prefix|
+				patterns << "#{prefix}/*.rb"
+			end
+		else
+			# Use all but the last pattern, which will just be '*.rb'
+			Pluggability.log.debug "Using factory type (%p) to build load patterns." %
+				[ self.factory_type ]
+			patterns += self.make_require_path( '*', '' )[0..-2].
+				map {|f| f + '.rb' }
+		end
+
+		patterns.each do |glob|
+			Pluggability.log.debug "  finding derivatives matching pattern %p" % [ glob ]
+			candidates = Gem.find_files( glob )
+			Pluggability.log.debug "  found %d matching files" % [ candidates.length ]
+			next if candidates.empty?
+
+			candidates.each {|path| require(path) }
+		end
+
+		return self.derivative_classes
+	end
+
+
 	### Calculates an appropriate filename for the derived class using the
 	### name of the base class and tries to load it via <tt>require</tt>. If
 	### the including class responds to a method named
@@ -181,7 +215,7 @@ module Pluggability
 	### require line is tried with both <tt>'foo/'</tt> and <tt>'bar/'</tt>
 	### prepended to it.
 	def load_derivative( class_name )
-		Pluggability.logger.debug "Loading derivative #{class_name}"
+		Pluggability.log.debug "Loading derivative #{class_name}"
 
 		# Get the unique part of the derived class name and try to
 		# load it from one of the derivative subdirs, if there are
@@ -197,7 +231,7 @@ module Pluggability
 				self.factory_type,
 				class_name.downcase,
 			]
-			Pluggability.logger.error( errmsg )
+			Pluggability.log.error( errmsg )
 			raise FactoryError, errmsg, caller(3)
 		end
 	end
@@ -224,7 +258,7 @@ module Pluggability
 
 		subdirs = self.plugin_prefixes
 		subdirs << '' if subdirs.empty?
-		Pluggability.logger.debug "Subdirs are: %p" % [subdirs]
+		Pluggability.log.debug "Subdirs are: %p" % [subdirs]
 		fatals = []
 		tries  = []
 
@@ -240,14 +274,14 @@ module Pluggability
 				begin
 					require( path.untaint )
 				rescue LoadError => err
-					Pluggability.logger.debug "No module at '%s', trying the next alternative: '%s'" %
+					Pluggability.log.debug "No module at '%s', trying the next alternative: '%s'" %
 						[ path, err.message ]
 				rescue Exception => err
 					fatals << err
-					Pluggability.logger.error "Found '#{path}', but encountered an error: %s\n\t%s" %
+					Pluggability.log.error "Found '#{path}', but encountered an error: %s\n\t%s" %
 						[ err.message, err.backtrace.join("\n\t") ]
 				else
-					Pluggability.logger.info "Loaded '#{path}' without error."
+					Pluggability.log.info "Loaded '#{path}' without error."
 					return path
 				end
 			end
@@ -263,10 +297,10 @@ module Pluggability
 				mod_name,
 				tries
 			  ]
-			Pluggability.logger.error( errmsg )
+			Pluggability.log.error( errmsg )
 			raise FactoryError, errmsg
 		else
-			Pluggability.logger.debug "Re-raising first fatal error"
+			Pluggability.log.debug "Re-raising first fatal error"
 			Kernel.raise( fatals.first )
 		end
 	end
@@ -297,8 +331,9 @@ module Pluggability
 			path.collect! {|m| File.join(subdir, m)}
 		end
 
-		Pluggability.logger.debug "Path is: #{path.uniq.reverse.inspect}..."
+		Pluggability.log.debug "Path is: #{path.uniq.reverse.inspect}..."
 		return path.uniq.reverse
 	end
 
-end # module Factory
+end # module Pluggability
+
