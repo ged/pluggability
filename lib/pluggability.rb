@@ -337,3 +337,7 @@ module Pluggability
 
 end # module Pluggability
 
+
+# Backward-compatibility alias
+FactoryError = Pluggability::FactoryError unless defined?( FactoryError )
+

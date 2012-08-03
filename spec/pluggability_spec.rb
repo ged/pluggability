@@ -116,7 +116,7 @@ describe Pluggability do
 
 			expect {
 				Plugin.create('scintillating')
-			}.to raise_error( FactoryError, /couldn't find a \S+ named \S+.*tried \[/i )
+			}.to raise_error( Pluggability::FactoryError, /couldn't find a \S+ named \S+.*tried \[/i )
 		end
 
 
@@ -126,7 +126,7 @@ describe Pluggability do
 
 			expect {
 				Plugin.create('corruscating')
-			}.to raise_error( FactoryError, /Require of '\S+' succeeded, but didn't load a Plugin/i )
+			}.to raise_error( Pluggability::FactoryError, /Require of '\S+' succeeded, but didn't load a Plugin/i )
 		end
 
 
@@ -172,7 +172,7 @@ describe Pluggability do
 			TestingPlugin.stub!( :ancestors ).and_return( [] )
 			expect {
 				TestingPlugin.factory_type
-			}.to raise_error( FactoryError, /couldn't find factory base/i )
+			}.to raise_error( Pluggability::FactoryError, /couldn't find factory base/i )
 		end
 	end
 
