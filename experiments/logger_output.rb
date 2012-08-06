@@ -11,35 +11,38 @@ BEGIN {
 }
 
 require 'pluggability'
-require 'logger'
+require 'loggability'
 
 class DataDriver
-	include Pluggability
-	
-	@logger = Logger.new( $stderr )
-	@logger.level = Logger::DEBUG
-	Pluggability.logger_callback = lambda do |severity, msg|
-		@logger.send(severity, msg)
-	end
-
+	extend Pluggability
 end
+
+# Global level
+Loggability.level = :debug
+
+# Or just Pluggability's level:
+Pluggability.logger.level = :debug
 
 DataDriver.create( 'ringbuffer' )
 
 # $ ruby experiments/logger_output.rb 
-# D, [2008-03-19T18:16:29.861565 #70418] DEBUG -- : Loading derivative ringbuffer
-# D, [2008-03-19T18:16:29.862118 #70418] DEBUG -- : Subdirs are: [""]
-# D, [2008-03-19T18:16:29.862186 #70418] DEBUG -- : Path is: ["ringbufferdatadriver", "ringbufferDataDriver", "ringbuffer"]...
-# D, [2008-03-19T18:16:29.862235 #70418] DEBUG -- : Trying ringbufferdatadriver...
-# D, [2008-03-19T18:16:29.862383 #70418] DEBUG -- : No module at 'ringbufferdatadriver', trying the next alternative: 'no such file to load -- ringbufferdatadriver'
-# D, [2008-03-19T18:16:29.862422 #70418] DEBUG -- : Trying ringbufferDataDriver...
-# D, [2008-03-19T18:16:29.862546 #70418] DEBUG -- : No module at 'ringbufferDataDriver', trying the next alternative: 'no such file to load -- ringbufferDataDriver'
-# D, [2008-03-19T18:16:29.862581 #70418] DEBUG -- : Trying ringbuffer...
-# D, [2008-03-19T18:16:29.862707 #70418] DEBUG -- : No module at 'ringbuffer', trying the next alternative: 'no such file to load -- ringbuffer'
-# D, [2008-03-19T18:16:29.862746 #70418] DEBUG -- : fatals = []
-# E, [2008-03-19T18:16:29.862793 #70418] ERROR -- : Couldn't find a DataDriver named 'ringbuffer': tried ["ringbufferdatadriver", "ringbufferDataDriver", "ringbuffer"]
-# ./lib/pluggability.rb:348:in `require_derivative': Couldn't find a DataDriver named 'ringbuffer': tried ["ringbufferdatadriver", "ringbufferDataDriver", "ringbuffer"] (FactoryError)
-# 	from ./lib/pluggability.rb:252:in `load_derivative'
-# 	from ./lib/pluggability.rb:220:in `get_subclass'
-# 	from ./lib/pluggability.rb:194:in `create'
-# 	from experiments/logger_output.rb:27
+# [2012-08-03 12:23:43.680405 89358/main] debug {} -- Loading derivative ringbuffer
+# [2012-08-03 12:23:43.680504 89358/main] debug {} -- Subdirs are: [""]
+# [2012-08-03 12:23:43.680553 89358/main] debug {} -- Path is: ["ringbuffer_datadriver", "ringbuffer_DataDriver", "ringbufferdatadriver", "ringbufferDataDriver", "ringbuffer"]...
+# [2012-08-03 12:23:43.680587 89358/main] debug {} -- Trying ringbuffer_datadriver...
+# [2012-08-03 12:23:43.682473 89358/main] debug {} -- No module at 'ringbuffer_datadriver', trying the next alternative: 'cannot load such file -- ringbuffer_datadriver'
+# [2012-08-03 12:23:43.682503 89358/main] debug {} -- Trying ringbuffer_DataDriver...
+# [2012-08-03 12:23:43.684548 89358/main] debug {} -- No module at 'ringbuffer_DataDriver', trying the next alternative: 'cannot load such file -- ringbuffer_DataDriver'
+# [2012-08-03 12:23:43.684584 89358/main] debug {} -- Trying ringbufferdatadriver...
+# [2012-08-03 12:23:43.686695 89358/main] debug {} -- No module at 'ringbufferdatadriver', trying the next alternative: 'cannot load such file -- ringbufferdatadriver'
+# [2012-08-03 12:23:43.686745 89358/main] debug {} -- Trying ringbufferDataDriver...
+# [2012-08-03 12:23:43.689782 89358/main] debug {} -- No module at 'ringbufferDataDriver', trying the next alternative: 'cannot load such file -- ringbufferDataDriver'
+# [2012-08-03 12:23:43.689812 89358/main] debug {} -- Trying ringbuffer...
+# [2012-08-03 12:23:43.691544 89358/main] debug {} -- No module at 'ringbuffer', trying the next alternative: 'cannot load such file -- ringbuffer'
+# [2012-08-03 12:23:43.691571 89358/main] debug {} -- fatals = []
+# [2012-08-03 12:23:43.691609 89358/main] error {} -- Couldn't find a DataDriver named 'ringbuffer': tried ["ringbuffer_datadriver", "ringbuffer_DataDriver", "ringbufferdatadriver", "ringbufferDataDriver", "ringbuffer"]
+# /Users/mgranger/source/ruby/Pluggability/lib/pluggability.rb:301:in `require_derivative': Couldn't find a DataDriver named 'ringbuffer': tried ["ringbuffer_datadriver", "ringbuffer_DataDriver", "ringbufferdatadriver", "ringbufferDataDriver", "ringbuffer"] (Pluggability::FactoryError)
+# 	from /Users/mgranger/source/ruby/Pluggability/lib/pluggability.rb:224:in `load_derivative'
+# 	from /Users/mgranger/source/ruby/Pluggability/lib/pluggability.rb:159:in `get_subclass'
+# 	from /Users/mgranger/source/ruby/Pluggability/lib/pluggability.rb:133:in `create'
+# 	from experiments/logger_output.rb:26:in `<main>'

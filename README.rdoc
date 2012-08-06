@@ -1,187 +1,197 @@
 = pluggability
 
-* http://deveiate.org/projects/Pluggability
+project:: https://bitbucket.org/ged/pluggability
+docs   :: http://deveiate.org/code/pluggability
+github :: http://github.com/ged/pluggability
 
 
 == Description
 
-Pluggability is a mixin module that turns an including class into a factory for
-its derivatives, capable of searching for and loading them by name. This is
-useful when you have an abstract base class which defines an interface and basic
-functionality for a part of a larger system, and a collection of subclasses
-which implement the interface for different underlying functionality.
+Pluggability is a mixin module that turns an including class into a
+factory for its derivatives, capable of searching for and loading them
+by name. This is useful when you have an abstract base class which
+defines an interface and basic functionality for a part of a larger
+system, and a collection of subclasses which implement the interface for
+different underlying functionality.
 
-An example of where this might be useful is in a program which talks to a
-database. To avoid coupling it to a specific database, you use a Driver class
-which encapsulates your program's interaction with the database behind a useful
-interface. Now you can create a concrete implementation of the Driver class for
-each kind of database you wish to talk to. If you make the base Driver class a
-Pluggability, too, you can add new drivers simply by dropping them in a
-directory and using the Driver's `create` method to instantiate them:
+An example of where this might be useful is in a program which generates
+output with a 'driver' object, which provides a unified interface but
+generates different kinds of output.
 
-=== Synopsis
+First the abstract base class, which is extended with Pluggability:
 
-in driver.rb:
+    # in mygem/driver.rb:
+    require 'pluggability'
+    require 'mygem' unless defined?( MyGem )
+    
+    class MyGem::Driver
+        extend Pluggability
+        plugin_prefixes "drivers", "drivers/compat"
+    end
 
-	require "Pluggability"
-	
-	class Driver
-		include Pluggability
-		def self::derivative_dirs
-		   ["drivers"]
-		end
-	end
+We can have one driver that outputs PDF documents:
 
-in drivers/mysql.rb:
+    # mygem/drivers/pdf.rb:
+    require 'mygem/driver' unless defined?( MyGem::Driver )
+    
+    class MyGem::Driver::PDF < Driver
+        ...implementation...
+    end
 
-	require 'driver'
-	
-	class MysqlDriver < Driver
-		...implementation...
-	end
+and another that outputs plain ascii text:
 
-in /usr/lib/ruby/1.8/PostgresDriver.rb:
+    #mygem/drivers/ascii.rb:
+    require 'mygem/driver' unless defined?( MyGem::Driver )
+    
+    class MyGem::Driver::ASCII < Driver
+        ...implementation...
+    end
 
-	require 'driver'
-	
-	class PostgresDriver < Driver
-		...implementation...
-	end
+Now the driver is configurable by the end-user, who can just set
+it by its short name:
 
-elsewhere
+    require 'mygem'
+    
+    config[:driver_type] #=> "pdf"
+    driver = MyGem::Driver.create( config[:driver_type] )
+    driver.class #=> MyGem::Driver::PDF
 
-	require 'driver'
-	
-	config[:driver_type] #=> "mysql"
-	driver = Driver.create( config[:driver_type] )
-	driver.class #=> MysqlDriver
-	pgdriver = Driver.create( "PostGresDriver" )
+    # You can also pass arguments to the constructor, too:
+    ascii_driver = MyGem::Driver.create( :ascii, :columns => 80 )
+
 
 === How Plugins Are Loaded
 
-The +create+ class method added to your class by Pluggability searches for your
-module using several different strategies. It tries various permutations of the
-base class's name in combination with the derivative requested. For example,
-assume we want to make a +DataDriver+ base class, and then use plugins to define
-drivers for different kinds of data sources:
+The +create+ class method added to your class by Pluggability searches
+for your module using several different strategies. It tries various
+permutations of the base class's name in combination with the derivative
+requested. For example, assume we want to make a +LogReader+ base
+class, and then use plugins to define readers for different log
+formats:
 
-	require 'pluggability'
-	
-	class DataDriver
-	  include Pluggability
-	end
+    require 'pluggability'
+    
+    class LogReader
+        extend Pluggability
 
-When you attempt to load the 'socket' data-driver class like so:
+        def read_from_file( path ); end
+    end
 
-	DataDriver.create( 'socket' )
+When you attempt to load the 'apache' data-driver class like so:
+
+    LogReader.create( 'apache' )
 
 Pluggability searches for modules with the following names:
 
-	'socketdatadriver'
-	'socket_datadriver'
-	'socketDataDriver'
-	'socket_DataDriver'
-	'SocketDataDriver'
-	'Socket_DataDriver'
-	'socket'
-	'Socket'
+    'apachedatadriver'
+    'apache_datadriver'
+    'apacheLogReader'
+    'apache_LogReader'
+    'ApacheLogReader'
+    'Apache_LogReader'
+    'apache'
+    'Apache'
 
-Obviously the last one will load something other than what is intended, so you
-can also tell Pluggability that plugins should be loaded from a subdirectory by
-declaring a class method called `derivative_dirs` in the base class. It should
-return an Array that contains a list of subdirectories to try:
+Obviously the last one will load something other than what is intended,
+so you can also tell Pluggability that plugins should be loaded from a
+subdirectory by declaring one or more +plugin_prefixes+ in the base
+class. Each prefix will be tried (in the order they're declared) when
+searching for a subclass:
 
-	class DataDriver
-	  include Pluggability
-	
-	  def self::derivative_dirs
-	    ['drivers']
-	  end
-	end
+    class LogReader
+        extend Pluggability
+        plugin_prefixes 'drivers'
+    end
 
 This will change the list that is required to:
 
-	'drivers/socketdatadriver'
-	'drivers/socket_datadriver'
-	'drivers/socketDataDriver'
-	'drivers/socket_DataDriver'
-	'drivers/SocketDataDriver'
-	'drivers/Socket_DataDriver'
-	'drivers/socket'
-	'drivers/Socket'
+    'drivers/apachedatadriver'
+    'drivers/apache_datadriver'
+    'drivers/apacheLogReader'
+    'drivers/apache_LogReader'
+    'drivers/ApacheLogReader'
+    'drivers/Apache_LogReader'
+    'drivers/apache'
+    'drivers/Apache'
 
-If you return more than one subdirectory, each of them will be tried in turn:
+If you return more than one subdirectory, each of them will be tried in
+turn:
 
-	class DataDriver
-	  include Pluggability
-	
-	  def self::derivative_dirs
-	    ['drivers', 'datadriver']
-	  end
-	end
+    class LogReader
+        extend Pluggability
+        plugin_prefixes 'drivers', 'datadriver'
+    end
 
 will change the search to include:
 
-	'drivers/socketdatadriver'
-	'drivers/socket_datadriver'
-	'drivers/socketDataDriver'
-	'drivers/socket_DataDriver'
-	'drivers/SocketDataDriver'
-	'drivers/Socket_DataDriver'
-	'drivers/socket'
-	'drivers/Socket'
-	'datadriver/socketdatadriver'
-	'datadriver/socket_datadriver'
-	'datadriver/socketDataDriver'
-	'datadriver/socket_DataDriver'
-	'datadriver/SocketDataDriver'
-	'datadriver/Socket_DataDriver'
-	'datadriver/socket'
-	'datadriver/Socket'
+    'drivers/apachedatadriver'
+    'drivers/apache_datadriver'
+    'drivers/apacheLogReader'
+    'drivers/apache_LogReader'
+    'drivers/ApacheLogReader'
+    'drivers/Apache_LogReader'
+    'drivers/apache'
+    'drivers/Apache'
+    'datadriver/apachedatadriver'
+    'datadriver/apache_datadriver'
+    'datadriver/apacheLogReader'
+    'datadriver/apache_LogReader'
+    'datadriver/ApacheLogReader'
+    'datadriver/Apache_LogReader'
+    'datadriver/apache'
+    'datadriver/Apache'
 
-If the plugin is not found, a FactoryError is raised, and the message will list
-all the permutations that were tried.
+If the plugin is not found, a Pluggability::FactoryError is raised, and
+the message will list all the permutations that were tried.
+
 
 === Logging
 
-If you need a little more insight into what's going on, Pluggability uses
-'Logger' from the standard library. Just set its logger to your own to include
-log messages about plugins being loaded:
+If you need a little more insight into what's going on, Pluggability
+uses the "Loggability":https://rubygems.org/gems/loggability library.
+Just set the log level to 'debug' and it'll explain what's going on:
 
+    require 'pluggability'
+    require 'loggability'
+    
+    class LogReader
+        extend Pluggability
+    end
+    
+    # Global level
+    Loggability.level = :debug
 
-	require 'pluggability'
-	require 'logger'
-	
-	class DataDriver
-	  include Pluggability
-	
-	end
-	
-	$logger = Logger.new( $stderr )
-	$logger.level = Logger::DEBUG
-	Pluggability.logger = $logger
-	
-	DataDriver.create( 'ringbuffer' )
+    # Or just Pluggability's level:
+    Pluggability.logger.level = :debug
+    
+    LogReader.create( 'ringbuffer' )
 
 this might generate a log that looks like:
 
-	D, [...] DEBUG -- : Loading derivative ringbuffer
-	D, [...] DEBUG -- : Subdirs are: [""]
-	D, [...] DEBUG -- : Path is: ["ringbufferdatadriver", "ringbufferDataDriver", 
-	      "ringbuffer"]...
-	D, [...] DEBUG -- : Trying ringbufferdatadriver...
-	D, [...] DEBUG -- : No module at 'ringbufferdatadriver', trying the next 
-	      alternative: 'no such file to load -- ringbufferdatadriver'
-	D, [...] DEBUG -- : Trying ringbufferDataDriver...
-	D, [...] DEBUG -- : No module at 'ringbufferDataDriver', trying the next 
-	      alternative: 'no such file to load -- ringbufferDataDriver'
-	D, [...] DEBUG -- : Trying ringbuffer...
-	D, [...] DEBUG -- : No module at 'ringbuffer', trying the next alternative: 
-	      'no such file to load -- ringbuffer'
-	D, [...] DEBUG -- : fatals = []
-	E, [...] ERROR -- : Couldn't find a DataDriver named 'ringbuffer': 
-	      tried ["ringbufferdatadriver", "ringbufferDataDriver", "ringbuffer"]
-
+    [...] debug {} -- Loading derivative ringbuffer
+    [...] debug {} -- Subdirs are: [""]
+    [...] debug {} -- Path is: ["ringbuffer_datadriver", 
+      "ringbuffer_LogReader", "ringbufferdatadriver", 
+      "ringbufferLogReader", "ringbuffer"]...
+    [...] debug {} -- Trying ringbuffer_datadriver...
+    [...] debug {} -- No module at 'ringbuffer_datadriver', trying the 
+      next alternative: 'cannot load such file -- ringbuffer_datadriver'
+    [...] debug {} -- Trying ringbuffer_LogReader...
+    [...] debug {} -- No module at 'ringbuffer_LogReader', trying the
+      next alternative: 'cannot load such file -- ringbuffer_LogReader'
+    [...] debug {} -- Trying ringbufferdatadriver...
+    [...] debug {} -- No module at 'ringbufferdatadriver', trying the
+      next alternative: 'cannot load such file -- ringbufferdatadriver'
+    [...] debug {} -- Trying ringbufferLogReader...
+    [...] debug {} -- No module at 'ringbufferLogReader', trying the
+      next alternative: 'cannot load such file -- ringbufferLogReader'
+    [...] debug {} -- Trying ringbuffer...
+    [...] debug {} -- No module at 'ringbuffer', trying the next
+      alternative: 'cannot load such file -- ringbuffer'
+    [...] debug {} -- fatals = []
+    [...] error {} -- Couldn't find a LogReader named 'ringbuffer':
+      tried ["ringbuffer_datadriver", "ringbuffer_LogReader", 
+      "ringbufferdatadriver", "ringbufferLogReader", "ringbuffer"]
 
 
 == Installation
@@ -192,8 +202,8 @@ this might generate a log that looks like:
 == Contributing
 
 You can check out the current development source with Mercurial via its
-{Mercurial repo}[http://repo.deveiate.org/Pluggability]. Or if you prefer
-Git, via {its Github mirror}[https://github.com/ged/pluggability].
+{Mercurial repo}[https://bitbucket.org/ged/pluggability]. Or if you
+prefer Git, via {its Github mirror}[https://github.com/ged/pluggability].
 
 After checking out the source, run:
 

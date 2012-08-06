@@ -22,6 +22,8 @@ hoespec = Hoe.spec 'pluggability' do
 	self.dependency 'hoe-deveiate', '~> 0.1', :development
 
 	self.spec_extras[:licenses] = ["BSD"]
+	self.hg_sign_tags = true if self.respond_to?( :hg_sign_tags= )
+	self.check_history_on_release = true if self.respond_to?( :check_history_on_release= )
 	self.rdoc_locations << "deveiate:/usr/local/www/public/code/#{remote_rdoc_dir}"
 end
 
