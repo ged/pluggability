@@ -11,10 +11,13 @@ BEGIN {
 }
 
 require 'rspec'
-require 'logger'
 require 'pluggability'
-
 require 'spec/lib/helpers'
+
+
+#
+# Testing classes
+#
 
 class Plugin
 	extend Pluggability
@@ -29,6 +32,9 @@ module Test
 end
 
 
+#
+# Examples
+#
 describe Pluggability do
 
 	before( :each ) do
