@@ -49,12 +49,8 @@ module Pluggability
 	### Return the Hash of derivative classes, keyed by various versions of
 	### the class name.
 	def derivatives
-		ancestors.each do |klass|
-			if klass.instance_variables.include?( :@derivatives ) ||
-			   klass.instance_variables.include?( "@derivatives" )
-				return klass.instance_variable_get( :@derivatives )
-			end
-		end
+		return super unless defined?( @derivatives )
+		return @derivatives
 	end
 
 
@@ -83,6 +79,7 @@ module Pluggability
 	### Inheritance callback -- Register subclasses in the derivatives hash
 	### so that ::create knows about them.
 	def inherited( subclass )
+		Pluggability.logger.debug "%p inherited by %p" % [ self, subclass ]
 		keys = [ subclass ]
 
 		# If it's not an anonymous class, make some keys out of variants of its name
