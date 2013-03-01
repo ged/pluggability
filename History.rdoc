@@ -1,3 +1,8 @@
+== v0.0.2 [2012-08-13] Michael Granger <ged@FaerieMUD.org>
+
+Simplify Pluggability#derivatives.
+
+
 == v0.0.1 [2012-08-03] Michael Granger <ged@FaerieMUD.org>
 
 First release after renaming from PluginFactory.
