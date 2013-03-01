@@ -1,7 +1,7 @@
-#!/usr/bin/env ruby -w
+# -*- ruby -*-
+#encoding: utf-8
 
 require 'loggability' unless defined?( Loggability )
-
 
 # The Pluggability module
 module Pluggability
@@ -12,7 +12,7 @@ module Pluggability
 
 
 	# Library version
-	VERSION = '0.0.1'
+	VERSION = '0.0.2'
 
 
 	### An exception class for Pluggability specific errors.
