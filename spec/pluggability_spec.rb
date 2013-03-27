@@ -104,7 +104,7 @@ describe Pluggability do
 			Plugin.should_receive( :require ).with( 'plugins/dazzle_plugin' ).and_return do |*args|
 				loaded_class = Class.new( Plugin )
 				# Simulate a named class, since we're not really requiring
-				Plugin.derivatives['dazzle'] = loaded_class 
+				Plugin.derivatives['dazzle'] = loaded_class
 				true
 			end
 
@@ -162,7 +162,7 @@ describe Pluggability do
 				and_return( true )
 			Plugin.should_receive( :require ).with( 'plugins/private/third.rb' ).
 				and_return( true )
-			
+
 			Plugin.load_all
 		end
 	end
@@ -187,6 +187,10 @@ describe Pluggability do
 
 		it "is still creatable via its full name" do
 			Plugin.create( 'blacksheep' ).should be_an_instance_of( BlackSheep )
+		end
+
+		it "is loadable via its underbarred name" do
+			Plugin.create( 'black_sheep' ).should be_an_instance_of( BlackSheep )
 		end
 
 	end

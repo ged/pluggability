@@ -85,16 +85,7 @@ module Pluggability
 
 		# If it's not an anonymous class, make some keys out of variants of its name
 		if subclass.name
-			simple_name = subclass.name.sub( /#<Class:0x[[:xdigit:]]+>::/i, '' )
-			keys << simple_name << simple_name.downcase
-
-			# Handle class names like 'FooBar' for 'Bar' factories.
-			Pluggability.log.debug "Inherited %p for %p-type plugins" % [ subclass, self.factory_type ]
-			if subclass.name.match( /(?:.*::)?(\w+)(?:#{self.factory_type})/i )
-				keys << Regexp.last_match[1].downcase
-			else
-				keys << subclass.name.sub( /.*::/, '' ).downcase
-			end
+			keys += self.make_derivative_names( subclass )
 		else
 			Pluggability.log.debug "  no name-based variants for anonymous subclass %p" % [ subclass ]
 		end
@@ -106,6 +97,27 @@ module Pluggability
 		end
 
 		super
+	end
+
+
+	### Return all variants of the name of the given +subclass+ that can be
+	### used to load it.
+	def make_derivative_names( subclass )
+		keys = []
+
+		simple_name = subclass.name.sub( /^.*::/i, '' ).sub( /\W+$/, '' )
+		keys << simple_name << simple_name.downcase
+		keys << simple_name.gsub( /([a-z])([A-Z])/, "\\1_\\2" ).downcase
+
+		# Handle class names like 'FooBar' for 'Bar' factories.
+		Pluggability.log.debug "Inherited %p for %p-type plugins" % [ subclass, self.plugin_type ]
+		if subclass.name.match( /(?:.*::)?(\w+)(?:#{self.plugin_type})/i )
+			keys << Regexp.last_match[1].downcase
+		else
+			keys << subclass.name.sub( /.*::/, '' ).downcase
+		end
+
+		return keys
 	end
 
 
