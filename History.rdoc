@@ -1,3 +1,9 @@
+== v0.1.0 [2013-03-27] Michael Granger <ged@FaerieMUD.org>
+
+- Add loading via underbarred name variants (CommaDelimitedThing ->
+  comma_delimited)
+- Rename some stuff for consistency.
+
 == v0.0.2 [2012-08-13] Michael Granger <ged@FaerieMUD.org>
 
 Simplify Pluggability#derivatives.
