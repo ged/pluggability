@@ -170,15 +170,15 @@ describe Pluggability do
 
 	context "derivative of an extended class" do
 
-		it "knows what type of factory loads it" do
-			TestingPlugin.factory_type.should == 'Plugin'
+		it "knows what type of plugin loads it" do
+			TestingPlugin.plugin_type.should == 'Plugin'
 		end
 
 		it "raises a FactoryError if it can't figure out what type of factory loads it" do
 			TestingPlugin.stub!( :ancestors ).and_return( [] )
 			expect {
-				TestingPlugin.factory_type
-			}.to raise_error( Pluggability::FactoryError, /couldn't find factory base/i )
+				TestingPlugin.plugin_type
+			}.to raise_error( Pluggability::FactoryError, /couldn't find plugin base/i )
 		end
 	end
 
