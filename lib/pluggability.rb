@@ -55,7 +55,7 @@ module Pluggability
 
 
 	### Returns the type name used when searching for a derivative.
-	def factory_type
+	def plugin_type
 		base = nil
 		self.ancestors.each do |klass|
 			if klass.instance_variables.include?( :@derivatives ) ||
@@ -65,7 +65,7 @@ module Pluggability
 			end
 		end
 
-		raise FactoryError, "Couldn't find factory base for #{self.name}" if
+		raise FactoryError, "Couldn't find plugin base for #{self.name}" if
 			base.nil?
 
 		if base.name =~ /^.*::(.*)/
@@ -74,6 +74,7 @@ module Pluggability
 			return base.name
 		end
 	end
+	alias factory_type plugin_type
 
 
 	### Inheritance callback -- Register subclasses in the derivatives hash
@@ -169,7 +170,7 @@ module Pluggability
 
 
 	### Find and load all derivatives of this class, using plugin_prefixes if any
-	### are defined, or a pattern derived from the #factory_type if not. Returns
+	### are defined, or a pattern derived from the #plugin_type if not. Returns
 	### an array of all derivative classes. Load failures are logged but otherwise
 	### ignored.
 	def load_all
@@ -183,8 +184,8 @@ module Pluggability
 			end
 		else
 			# Use all but the last pattern, which will just be '*.rb'
-			Pluggability.log.debug "Using factory type (%p) to build load patterns." %
-				[ self.factory_type ]
+			Pluggability.log.debug "Using plugin type (%p) to build load patterns." %
+				[ self.plugin_type ]
 			patterns += self.make_require_path( '*', '' )[0..-2].
 				map {|f| f + '.rb' }
 		end
@@ -225,7 +226,7 @@ module Pluggability
 		unless self.derivatives[ class_name.downcase ]
 			errmsg = "Require of '%s' succeeded, but didn't load a %s named '%s' for some reason." % [
 				result,
-				self.factory_type,
+				self.plugin_type,
 				class_name.downcase,
 			]
 			Pluggability.log.error( errmsg )
@@ -236,11 +237,11 @@ module Pluggability
 
 	### Build and return the unique part of the given <tt>class_name</tt>
 	### either by stripping leading namespaces if the name already has the
-	### name of the factory type in it (eg., 'My::FooService' for Service,
-	### or by appending the factory type if it doesn't.
+	### name of the plugin type in it (eg., 'My::FooService' for Service,
+	### or by appending the plugin type if it doesn't.
 	def get_module_name( class_name )
-		if class_name =~ /\w+#{self.factory_type}/
-			mod_name = class_name.sub( /(?:.*::)?(\w+)(?:#{self.factory_type})/, "\\1" )
+		if class_name =~ /\w+#{self.plugin_type}/
+			mod_name = class_name.sub( /(?:.*::)?(\w+)(?:#{self.plugin_type})/, "\\1" )
 		else
 			mod_name = class_name
 		end
@@ -290,7 +291,7 @@ module Pluggability
 		# some reason.
 		if fatals.empty?
 			errmsg = "Couldn't find a %s named '%s': tried %p" % [
-				self.factory_type,
+				self.plugin_type,
 				mod_name,
 				tries
 			  ]
@@ -310,7 +311,7 @@ module Pluggability
 	###    "drivers/SocketDataDriver", "drivers/socket", "drivers/Socket"]
 	def make_require_path( modname, subdir )
 		path = []
-		myname = self.factory_type
+		myname = self.plugin_type
 
 		# Make permutations of the two parts
 		path << modname
