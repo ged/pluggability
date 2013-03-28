@@ -12,14 +12,15 @@ hoespec = Hoe.spec 'pluggability' do
 	self.readme_file = 'README.rdoc'
 	self.history_file = 'History.rdoc'
 	self.extra_rdoc_files = Rake::FileList[ '*.rdoc' ]
-	self.spec_extras[:rdoc_options] = ['-f', 'fivefish', '-t', 'Pluggability Toolkit']
+	self.spec_extras[:rdoc_options] = ['-t', 'Pluggability Toolkit']
+	self.spec_extras[:rdoc_options] += [ '-f', 'fivefish' ] if File.directory?( '.hg' )
 
 	self.developer 'Martin Chase', 'stillflame@FaerieMUD.org'
 	self.developer 'Michael Granger', 'ged@FaerieMUD.org'
 
-	self.dependency 'loggability', '~> 0.5'
+	self.dependency 'loggability', '~> 0.6'
 
-	self.dependency 'hoe-deveiate', '~> 0.1', :development
+	self.dependency 'hoe-deveiate', '~> 0.2', :development
 
 	self.spec_extras[:licenses] = ["BSD"]
 	self.hg_sign_tags = true if self.respond_to?( :hg_sign_tags= )
