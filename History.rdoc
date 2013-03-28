@@ -1,3 +1,10 @@
+== v0.2.0 [2013-03-28] Michael Granger <ged@FaerieMUD.org>
+
+- Fix loading of grandchildren of plugins
+- Rename Pluggability::FactoryError to 
+  Pluggability::PluginError (with backward-compatibility aliases)
+
+
 == v0.1.0 [2013-03-27] Michael Granger <ged@FaerieMUD.org>
 
 - Add loading via underbarred name variants (CommaDelimitedThing ->
