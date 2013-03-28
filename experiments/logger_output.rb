@@ -41,7 +41,7 @@ DataDriver.create( 'ringbuffer' )
 # [2012-08-03 12:23:43.691544 89358/main] debug {} -- No module at 'ringbuffer', trying the next alternative: 'cannot load such file -- ringbuffer'
 # [2012-08-03 12:23:43.691571 89358/main] debug {} -- fatals = []
 # [2012-08-03 12:23:43.691609 89358/main] error {} -- Couldn't find a DataDriver named 'ringbuffer': tried ["ringbuffer_datadriver", "ringbuffer_DataDriver", "ringbufferdatadriver", "ringbufferDataDriver", "ringbuffer"]
-# /Users/mgranger/source/ruby/Pluggability/lib/pluggability.rb:301:in `require_derivative': Couldn't find a DataDriver named 'ringbuffer': tried ["ringbuffer_datadriver", "ringbuffer_DataDriver", "ringbufferdatadriver", "ringbufferDataDriver", "ringbuffer"] (Pluggability::FactoryError)
+# /Users/mgranger/source/ruby/Pluggability/lib/pluggability.rb:301:in `require_derivative': Couldn't find a DataDriver named 'ringbuffer': tried ["ringbuffer_datadriver", "ringbuffer_DataDriver", "ringbufferdatadriver", "ringbufferDataDriver", "ringbuffer"] (Pluggability::PluginError)
 # 	from /Users/mgranger/source/ruby/Pluggability/lib/pluggability.rb:224:in `load_derivative'
 # 	from /Users/mgranger/source/ruby/Pluggability/lib/pluggability.rb:159:in `get_subclass'
 # 	from /Users/mgranger/source/ruby/Pluggability/lib/pluggability.rb:133:in `create'
