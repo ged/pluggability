@@ -31,6 +31,8 @@ module Test
 	class LoadablePlugin < Plugin; end
 end
 
+class SubSubPlugin < SubPlugin; end
+
 
 #
 # Examples
@@ -122,7 +124,7 @@ describe Pluggability do
 
 			expect {
 				Plugin.create('scintillating')
-			}.to raise_error( Pluggability::FactoryError, /couldn't find a \S+ named \S+.*tried \[/i )
+			}.to raise_error( Pluggability::PluginError, /couldn't find a \S+ named \S+.*tried \[/i )
 		end
 
 
@@ -132,7 +134,7 @@ describe Pluggability do
 
 			expect {
 				Plugin.create('corruscating')
-			}.to raise_error( Pluggability::FactoryError, /Require of '\S+' succeeded, but didn't load a Plugin/i )
+			}.to raise_error( Pluggability::PluginError, /Require of '\S+' succeeded, but didn't load a Plugin/i )
 		end
 
 
@@ -174,11 +176,11 @@ describe Pluggability do
 			TestingPlugin.plugin_type.should == 'Plugin'
 		end
 
-		it "raises a FactoryError if it can't figure out what type of factory loads it" do
+		it "raises a PluginError if it can't figure out what type of factory loads it" do
 			TestingPlugin.stub!( :ancestors ).and_return( [] )
 			expect {
 				TestingPlugin.plugin_type
-			}.to raise_error( Pluggability::FactoryError, /couldn't find plugin base/i )
+			}.to raise_error( Pluggability::PluginError, /couldn't find plugin base/i )
 		end
 	end
 
@@ -200,6 +202,15 @@ describe Pluggability do
 
 		it "is still creatable via its derivative name" do
 			Plugin.create( 'loadable' ).should be_an_instance_of( Test::LoadablePlugin )
+		end
+
+	end
+
+
+	context "subclass of a derivative" do
+
+		it "is still registered with the base class" do
+			Plugin.derivatives[ 'subsub' ].should == SubSubPlugin
 		end
 
 	end

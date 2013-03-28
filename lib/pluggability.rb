@@ -15,21 +15,44 @@ module Pluggability
 	VERSION = '0.1.0'
 
 
-	### An exception class for Pluggability specific errors.
-	class FactoryError < RuntimeError; end
+	# An exception class for Pluggability specific errors.
+	class PluginError < RuntimeError; end
+	FactoryError = PluginError
 
 
 	### Add the @derivatives instance variable to including classes.
 	def self::extend_object( obj )
 		obj.instance_variable_set( :@plugin_prefixes, [] )
 		obj.instance_variable_set( :@derivatives, {} )
+
+		Pluggability.pluggable_classes << obj
+
 		super
+	end
+
+
+	##
+	# The Array of all classes that have added Pluggability
+	@pluggable_classes = []
+	class << self; attr_reader :pluggable_classes; end
+
+
+	### Return the ancestor of +subclass+ that has Pluggability.
+	def self::plugin_base_class( subclass )
+		return subclass.ancestors.find do |klass|
+			Pluggability.pluggable_classes.include?( klass )
+		end
 	end
 
 
 	#############################################################
 	###	M I X I N   M E T H O D S
 	#############################################################
+
+	### Return the Hash of derivative classes, keyed by various versions of
+	### the class name.
+	attr_reader :derivatives
+
 
 	### Get/set the prefixes that will be used when searching for particular plugins
 	### for the calling Class.
@@ -46,27 +69,10 @@ module Pluggability
 	end
 
 
-	### Return the Hash of derivative classes, keyed by various versions of
-	### the class name.
-	def derivatives
-		return super unless defined?( @derivatives )
-		return @derivatives
-	end
-
-
 	### Returns the type name used when searching for a derivative.
 	def plugin_type
-		base = nil
-		self.ancestors.each do |klass|
-			if klass.instance_variables.include?( :@derivatives ) ||
-				klass.instance_variables.include?( "@derivatives" )
-				base = klass
-				break
-			end
-		end
-
-		raise FactoryError, "Couldn't find plugin base for #{self.name}" if
-			base.nil?
+		base = Pluggability.plugin_base_class( self ) or
+			raise PluginError, "Couldn't find plugin base for #{self.name}"
 
 		if base.name =~ /^.*::(.*)/
 			return $1
@@ -80,20 +86,22 @@ module Pluggability
 	### Inheritance callback -- Register subclasses in the derivatives hash
 	### so that ::create knows about them.
 	def inherited( subclass )
-		Pluggability.logger.debug "%p inherited by %p" % [ self, subclass ]
+		plugin_class = Pluggability.plugin_base_class( subclass )
+
+		Pluggability.logger.debug "%p inherited by %p" % [ plugin_class, subclass ]
 		keys = [ subclass ]
 
 		# If it's not an anonymous class, make some keys out of variants of its name
 		if subclass.name
-			keys += self.make_derivative_names( subclass )
+			keys += plugin_class.make_derivative_names( subclass )
 		else
 			Pluggability.log.debug "  no name-based variants for anonymous subclass %p" % [ subclass ]
 		end
 
 		keys.compact.uniq.each do |key|
 			Pluggability.log.info "Registering %s derivative of %s as %p" %
-				[ subclass.name, self.name, key ]
-			self.derivatives[ key ] = subclass
+				[ subclass.name, plugin_class.name, key ]
+			plugin_class.derivatives[ key ] = subclass
 		end
 
 		super
@@ -170,7 +178,7 @@ module Pluggability
 
 			subclass = self.derivatives[ class_name.downcase ]
 			unless subclass.is_a?( Class )
-				raise FactoryError,
+				raise PluginError,
 					"load_derivative(%s) added something other than a class "\
 					"to the registry for %s: %p" %
 					[ class_name, self.name, subclass ]
@@ -242,7 +250,7 @@ module Pluggability
 				class_name.downcase,
 			]
 			Pluggability.log.error( errmsg )
-			raise FactoryError, errmsg, caller(3)
+			raise PluginError, errmsg, caller(3)
 		end
 	end
 
@@ -308,7 +316,7 @@ module Pluggability
 				tries
 			  ]
 			Pluggability.log.error( errmsg )
-			raise FactoryError, errmsg
+			raise PluginError, errmsg
 		else
 			Pluggability.log.debug "Re-raising first fatal error"
 			Kernel.raise( fatals.first )
@@ -349,5 +357,5 @@ end # module Pluggability
 
 
 # Backward-compatibility alias
-FactoryError = Pluggability::FactoryError unless defined?( FactoryError )
+FactoryError = Pluggability::PluginError unless defined?( FactoryError )
 

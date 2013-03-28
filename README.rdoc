@@ -141,7 +141,7 @@ will change the search to include:
     'datadriver/apache'
     'datadriver/Apache'
 
-If the plugin is not found, a Pluggability::FactoryError is raised, and
+If the plugin is not found, a Pluggability::PluginError is raised, and
 the message will list all the permutations that were tried.
 
 
@@ -215,7 +215,7 @@ and generate the API documentation.
 
 == License
 
-Copyright (c) 2008-2012, Michael Granger and Martin Chase
+Copyright (c) 2008-2013, Michael Granger and Martin Chase
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
