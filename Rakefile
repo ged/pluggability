@@ -5,6 +5,7 @@ require 'hoe'
 Hoe.plugin :deveiate
 Hoe.plugin :mercurial
 Hoe.plugin :signing
+Hoe.plugin :bundler
 
 Hoe.plugins.delete :rubyforge
 
@@ -13,16 +14,16 @@ hoespec = Hoe.spec 'pluggability' do
 	self.history_file = 'History.rdoc'
 	self.extra_rdoc_files = Rake::FileList[ '*.rdoc' ]
 	self.spec_extras[:rdoc_options] = ['-t', 'Pluggability Toolkit']
-	self.spec_extras[:rdoc_options] += [ '-f', 'fivefish' ] if File.directory?( '.hg' )
 
 	self.developer 'Martin Chase', 'stillflame@FaerieMUD.org'
 	self.developer 'Michael Granger', 'ged@FaerieMUD.org'
 
-	self.dependency 'loggability', '~> 0.6'
+	self.dependency 'loggability', '~> 0.7'
 
-	self.dependency 'hoe-deveiate', '~> 0.2', :development
+	self.dependency 'hoe-deveiate', '~> 0.3', :development
+	self.dependency 'hoe-bundler', '~> 1.2', :development
 
-	self.spec_extras[:licenses] = ["BSD"]
+	self.license "BSD"
 	self.hg_sign_tags = true if self.respond_to?( :hg_sign_tags= )
 	self.check_history_on_release = true if self.respond_to?( :check_history_on_release= )
 	self.rdoc_locations << "deveiate:/usr/local/www/public/code/#{remote_rdoc_dir}"

@@ -1,3 +1,4 @@
 # .rvm.gems generated gem export file. Note that any env variable settings will be missing. Append these after using a ';' field separator
-loggability -v0.6.0
-hoe-deveiate -v0.2.0
+loggability -v0.7.0
+hoe-deveiate -v0.3.0
+hoe-bundler -v1.2.0
