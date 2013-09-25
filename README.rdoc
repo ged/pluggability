@@ -77,22 +77,18 @@ formats:
         def read_from_file( path ); end
     end
 
-When you attempt to load the 'apache' data-driver class like so:
+When you attempt to load the 'apache' logreader class like so:
 
     LogReader.create( 'apache' )
 
 Pluggability searches for modules with the following names:
 
-    'apachedatadriver'
-    'apache_datadriver'
-    'apacheLogReader'
-    'apache_LogReader'
-    'ApacheLogReader'
-    'Apache_LogReader'
-    'apache'
-    'Apache'
-
-Obviously the last one will load something other than what is intended,
+    ApacheLogReader
+    apachelogreader
+    apache_log_reader
+    apache
+ 
+Obviously the last one might load something other than what is intended,
 so you can also tell Pluggability that plugins should be loaded from a
 subdirectory by declaring one or more +plugin_prefixes+ in the base
 class. Each prefix will be tried (in the order they're declared) when
@@ -105,41 +101,38 @@ searching for a subclass:
 
 This will change the list that is required to:
 
-    'drivers/apachedatadriver'
-    'drivers/apache_datadriver'
-    'drivers/apacheLogReader'
-    'drivers/apache_LogReader'
-    'drivers/ApacheLogReader'
-    'drivers/Apache_LogReader'
-    'drivers/apache'
-    'drivers/Apache'
+    drivers/apache_logreader
+    drivers/apache_LogReader
+    drivers/apachelogreader
+    drivers/apacheLogReader
+    drivers/apache
 
-If you return more than one subdirectory, each of them will be tried in
+If you specify more than one subdirectory, each of them will be tried in
 turn:
 
     class LogReader
         extend Pluggability
-        plugin_prefixes 'drivers', 'datadriver'
+        plugin_prefixes 'drivers', 'logreader'
     end
 
 will change the search to include:
 
-    'drivers/apachedatadriver'
-    'drivers/apache_datadriver'
+    'drivers/apachelogreader'
+    'drivers/apache_logreader'
     'drivers/apacheLogReader'
     'drivers/apache_LogReader'
     'drivers/ApacheLogReader'
     'drivers/Apache_LogReader'
     'drivers/apache'
     'drivers/Apache'
-    'datadriver/apachedatadriver'
-    'datadriver/apache_datadriver'
-    'datadriver/apacheLogReader'
-    'datadriver/apache_LogReader'
-    'datadriver/ApacheLogReader'
-    'datadriver/Apache_LogReader'
-    'datadriver/apache'
-    'datadriver/Apache'
+    'logreader/apachelogreader'
+    'logreader/apache_logreader'
+    'logreader/apacheLogReader'
+    'logreader/apache_LogReader'
+    'logreader/ApacheLogReader'
+    'logreader/Apache_LogReader'
+    'logreader/apache'
+    'logreader/Apache'
 
 If the plugin is not found, a Pluggability::PluginError is raised, and
 the message will list all the permutations that were tried.
@@ -170,18 +163,18 @@ this might generate a log that looks like:
 
     [...] debug {} -- Loading derivative ringbuffer
     [...] debug {} -- Subdirs are: [""]
-    [...] debug {} -- Path is: ["ringbuffer_datadriver", 
-      "ringbuffer_LogReader", "ringbufferdatadriver", 
+    [...] debug {} -- Path is: ["ringbuffer_logreader", 
+      "ringbuffer_LogReader", "ringbufferlogreader", 
       "ringbufferLogReader", "ringbuffer"]...
-    [...] debug {} -- Trying ringbuffer_datadriver...
-    [...] debug {} -- No module at 'ringbuffer_datadriver', trying the 
-      next alternative: 'cannot load such file -- ringbuffer_datadriver'
+    [...] debug {} -- Trying ringbuffer_logreader...
+    [...] debug {} -- No module at 'ringbuffer_logreader', trying the 
+      next alternative: 'cannot load such file -- ringbuffer_logreader'
     [...] debug {} -- Trying ringbuffer_LogReader...
     [...] debug {} -- No module at 'ringbuffer_LogReader', trying the
       next alternative: 'cannot load such file -- ringbuffer_LogReader'
-    [...] debug {} -- Trying ringbufferdatadriver...
-    [...] debug {} -- No module at 'ringbufferdatadriver', trying the
-      next alternative: 'cannot load such file -- ringbufferdatadriver'
+    [...] debug {} -- Trying ringbufferlogreader...
+    [...] debug {} -- No module at 'ringbufferlogreader', trying the
+      next alternative: 'cannot load such file -- ringbufferlogreader'
     [...] debug {} -- Trying ringbufferLogReader...
     [...] debug {} -- No module at 'ringbufferLogReader', trying the
       next alternative: 'cannot load such file -- ringbufferLogReader'
@@ -190,8 +183,8 @@ this might generate a log that looks like:
       alternative: 'cannot load such file -- ringbuffer'
     [...] debug {} -- fatals = []
     [...] error {} -- Couldn't find a LogReader named 'ringbuffer':
-      tried ["ringbuffer_datadriver", "ringbuffer_LogReader", 
-      "ringbufferdatadriver", "ringbufferLogReader", "ringbuffer"]
+      tried ["ringbuffer_logreader", "ringbuffer_LogReader", 
+      "ringbufferlogreader", "ringbufferLogReader", "ringbuffer"]
 
 
 == Installation
