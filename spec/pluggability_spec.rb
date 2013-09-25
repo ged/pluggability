@@ -1,18 +1,8 @@
 #!/usr/bin/env ruby
 
-BEGIN {
-	require 'pathname'
-	basedir = Pathname.new( __FILE__ ).dirname.parent
+require_relative 'helpers'
 
-	libdir = basedir + "lib"
-
-	$LOAD_PATH.unshift( basedir ) unless $LOAD_PATH.include?( basedir )
-	$LOAD_PATH.unshift( libdir ) unless $LOAD_PATH.include?( libdir )
-}
-
-require 'rspec'
 require 'pluggability'
-require 'spec/lib/helpers'
 
 
 #
@@ -49,7 +39,7 @@ describe Pluggability do
 
 
 	it "allows extended objects to declare one or more prefixes to use when requiring derviatives" do
-		Plugin.plugin_prefixes.should == ['plugins', 'plugins/private']
+		expect( Plugin.plugin_prefixes ).to eq( ['plugins', 'plugins/private'] )
 	end
 
 
@@ -57,19 +47,19 @@ describe Pluggability do
 	context "-extended class" do
 
 		it "knows about all of its derivatives" do
-			Plugin.derivatives.keys.should include( 'sub' )
-			Plugin.derivatives.keys.should include( 'subplugin' )
-			Plugin.derivatives.keys.should include( 'SubPlugin' )
-			Plugin.derivatives.keys.should include( SubPlugin )
+			expect( Plugin.derivatives.keys ).to include( 'sub' )
+			expect( Plugin.derivatives.keys ).to include( 'subplugin' )
+			expect( Plugin.derivatives.keys ).to include( 'SubPlugin' )
+			expect( Plugin.derivatives.keys ).to include( SubPlugin )
 		end
 
 		it "returns derivatives directly if they're already loaded" do
 			class AlreadyLoadedPlugin < Plugin; end
-			Kernel.should_not_receive( :require )
-			Plugin.create( 'alreadyloaded' ).should be_an_instance_of( AlreadyLoadedPlugin )
-			Plugin.create( 'AlreadyLoaded' ).should be_an_instance_of( AlreadyLoadedPlugin )
-			Plugin.create( 'AlreadyLoadedPlugin' ).should be_an_instance_of( AlreadyLoadedPlugin )
-			Plugin.create( AlreadyLoadedPlugin ).should be_an_instance_of( AlreadyLoadedPlugin )
+			expect( Kernel ).to_not receive( :require )
+			expect( Plugin.create('alreadyloaded') ).to be_an_instance_of( AlreadyLoadedPlugin )
+			expect( Plugin.create('AlreadyLoaded') ).to be_an_instance_of( AlreadyLoadedPlugin )
+			expect( Plugin.create('AlreadyLoadedPlugin') ).to be_an_instance_of( AlreadyLoadedPlugin )
+			expect( Plugin.create(AlreadyLoadedPlugin) ).to be_an_instance_of( AlreadyLoadedPlugin )
 		end
 
 		it "filters errors that happen when creating an instance of derivatives so they " +
@@ -89,7 +79,7 @@ describe Pluggability do
 				fail "Expected an exception to be raised."
 			end
 
-			exception.backtrace.first.should =~ /#{__FILE__}/
+			expect( exception.backtrace.first ).to match(/#{__FILE__}/)
 		end
 
 		it "will refuse to create an object other than one of its derivatives" do
@@ -103,14 +93,14 @@ describe Pluggability do
 		it "will load new plugins from the require path if they're not loaded yet" do
 			loaded_class = nil
 
-			Plugin.should_receive( :require ).with( 'plugins/dazzle_plugin' ).and_return do |*args|
+			expect( Plugin ).to receive( :require ).with( 'plugins/dazzle_plugin' ).and_return do |*args|
 				loaded_class = Class.new( Plugin )
 				# Simulate a named class, since we're not really requiring
 				Plugin.derivatives['dazzle'] = loaded_class
 				true
 			end
 
-			Plugin.create( 'dazzle' ).should be_an_instance_of( loaded_class )
+			expect( Plugin.create('dazzle') ).to be_an_instance_of( loaded_class )
 		end
 
 
@@ -118,7 +108,7 @@ describe Pluggability do
 			"derivative fails" do
 
 			# at least 6 -> 3 variants * 2 paths
-			Plugin.should_receive( :require ).
+			expect( Plugin ).to receive( :require ).
 				at_least(6).times.
 				and_return {|path| raise LoadError, "path" }
 
@@ -130,7 +120,7 @@ describe Pluggability do
 
 		it "will output a sensible description when a require succeeds, but it loads something unintended" do
 			# at least 6 -> 3 variants * 2 paths
-			Plugin.should_receive( :require ).and_return( true )
+			expect( Plugin ).to receive( :require ).and_return( true )
 
 			expect {
 				Plugin.create('corruscating')
@@ -142,9 +132,8 @@ describe Pluggability do
 			"derivative if none of the paths work" do
 
 			# at least 6 -> 3 variants * 2 paths
-			Plugin.should_receive( :require ).at_least(6).times.and_return {|path|
-				raise ScriptError, "error while parsing #{path}"
-			}
+			expect( Plugin ).to receive( :require ).at_least(6).times.
+				and_raise( ScriptError.new("error while parsing path") )
 
 			expect {
 				Plugin.create('portable')
@@ -153,16 +142,16 @@ describe Pluggability do
 
 
 		it "can preload all of its derivatives" do
-			Gem.should_receive( :find_files ).with( 'plugins/*.rb' ).
+			expect( Gem ).to receive( :find_files ).with( 'plugins/*.rb' ).
 				and_return([ 'plugins/first.rb' ])
-			Gem.should_receive( :find_files ).with( 'plugins/private/*.rb' ).
+			expect( Gem ).to receive( :find_files ).with( 'plugins/private/*.rb' ).
 				and_return([ 'plugins/private/second.rb', 'plugins/private/third.rb' ])
 
-			Plugin.should_receive( :require ).with( 'plugins/first.rb' ).
+			expect( Plugin ).to receive( :require ).with( 'plugins/first.rb' ).
 				and_return( true )
-			Plugin.should_receive( :require ).with( 'plugins/private/second.rb' ).
+			expect( Plugin ).to receive( :require ).with( 'plugins/private/second.rb' ).
 				and_return( true )
-			Plugin.should_receive( :require ).with( 'plugins/private/third.rb' ).
+			expect( Plugin ).to receive( :require ).with( 'plugins/private/third.rb' ).
 				and_return( true )
 
 			Plugin.load_all
@@ -173,11 +162,11 @@ describe Pluggability do
 	context "derivative of an extended class" do
 
 		it "knows what type of plugin loads it" do
-			TestingPlugin.plugin_type.should == 'Plugin'
+			expect( TestingPlugin.plugin_type ).to eq( 'Plugin' )
 		end
 
 		it "raises a PluginError if it can't figure out what type of factory loads it" do
-			TestingPlugin.stub!( :ancestors ).and_return( [] )
+			allow( TestingPlugin ).to receive( :ancestors ).and_return( [] )
 			expect {
 				TestingPlugin.plugin_type
 			}.to raise_error( Pluggability::PluginError, /couldn't find plugin base/i )
@@ -188,11 +177,11 @@ describe Pluggability do
 	context "derivative of an extended class that isn't named <Something>Plugin" do
 
 		it "is still creatable via its full name" do
-			Plugin.create( 'blacksheep' ).should be_an_instance_of( BlackSheep )
+			expect( Plugin.create('blacksheep') ).to be_an_instance_of( BlackSheep )
 		end
 
 		it "is loadable via its underbarred name" do
-			Plugin.create( 'black_sheep' ).should be_an_instance_of( BlackSheep )
+			expect( Plugin.create('black_sheep') ).to be_an_instance_of( BlackSheep )
 		end
 
 	end
@@ -201,7 +190,7 @@ describe Pluggability do
 	context "derivative of an extended class in another namespace" do
 
 		it "is still creatable via its derivative name" do
-			Plugin.create( 'loadable' ).should be_an_instance_of( Test::LoadablePlugin )
+			expect( Plugin.create('loadable') ).to be_an_instance_of( Test::LoadablePlugin )
 		end
 
 	end
@@ -210,7 +199,7 @@ describe Pluggability do
 	context "subclass of a derivative" do
 
 		it "is still registered with the base class" do
-			Plugin.derivatives[ 'subsub' ].should == SubSubPlugin
+			expect( Plugin.derivatives['subsub'] ).to eq( SubSubPlugin )
 		end
 
 	end
