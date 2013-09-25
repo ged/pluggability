@@ -4,5 +4,5 @@ Manifest.txt
 README.rdoc
 Rakefile
 lib/pluggability.rb
-spec/lib/helpers.rb
+spec/helpers.rb
 spec/pluggability_spec.rb
