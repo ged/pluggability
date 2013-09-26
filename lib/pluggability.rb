@@ -23,6 +23,7 @@ module Pluggability
 	### Add the @derivatives instance variable to including classes.
 	def self::extend_object( obj )
 		obj.instance_variable_set( :@plugin_prefixes, [] )
+		obj.instance_variable_set( :@plugin_exclusions, [] )
 		obj.instance_variable_set( :@derivatives, {} )
 
 		Pluggability.pluggable_classes << obj
@@ -66,6 +67,50 @@ module Pluggability
 	### for the calling Class.
 	def plugin_prefixes=( args )
 		@plugin_prefixes = Array( args )
+	end
+
+
+	### Get/set patterns which cause files in a plugin path to not be loaded. Typical
+	### use case is to exclude test/spec directories:
+	###
+	###     MyFactoryType.plugin_exclude( 'spec/**' )
+	###
+	def plugin_exclusions( *exclusions )
+		@plugin_exclusions.replace( exclusions ) if !exclusions.empty?
+		return @plugin_exclusions
+	end
+
+
+	### Set the plugin exclusion patterns which cause files in a plugin path to not
+	### be loaded.
+	def plugin_exclusions=( args )
+		@plugin_exclusions = Array( args )
+	end
+
+
+	### Returns +true+ if any of the #plugin_exclusions match the specified
+	### +path.
+	def is_excluded_path?( path )
+		rval = self.plugin_exclusions.find do |exclusion|
+			case exclusion
+			when Regexp
+				path =~ exclusion
+			when String
+				flags = 0
+				flags &= File::FNM_EXTGLOB if defined?( File::FNM_EXTGLOB )
+				File.fnmatch( exclusion, path, flags )
+			else
+				Pluggability.log.warn "Don't know how to apply exclusion: %p" % [ exclusion ]
+				false
+			end
+		end
+
+		if rval
+			Pluggability.log.debug "load path %p is excluded by %p" % [ path, rval ]
+			return true
+		else
+			return false
+		end
 	end
 
 
@@ -216,7 +261,10 @@ module Pluggability
 			Pluggability.log.debug "  found %d matching files" % [ candidates.length ]
 			next if candidates.empty?
 
-			candidates.each {|path| require(path) }
+			candidates.each do |path|
+				next if self.is_excluded_path?( path )
+				require( path )
+			end
 		end
 
 		return self.derivative_classes
@@ -284,6 +332,8 @@ module Pluggability
 		# module.
 		subdirs.map( &:strip ).each do |subdir|
 			self.make_require_path( mod_name, subdir ).each do |path|
+				next if self.is_excluded_path?( path )
+
 				Pluggability.logger.debug "Trying #{path}..."
 				tries << path
 

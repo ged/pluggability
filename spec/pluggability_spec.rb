@@ -29,11 +29,15 @@ class SubSubPlugin < SubPlugin; end
 #
 describe Pluggability do
 
-	before( :each ) do
-		setup_logging( :fatal )
+	before( :all ) do
+		setup_logging()
 	end
 
-	after( :each ) do
+	before( :each ) do
+		Plugin.plugin_exclusions = []
+	end
+
+	after( :all ) do
 		reset_logging()
 	end
 
@@ -47,10 +51,8 @@ describe Pluggability do
 	context "-extended class" do
 
 		it "knows about all of its derivatives" do
-			expect( Plugin.derivatives.keys ).to include( 'sub' )
-			expect( Plugin.derivatives.keys ).to include( 'subplugin' )
-			expect( Plugin.derivatives.keys ).to include( 'SubPlugin' )
-			expect( Plugin.derivatives.keys ).to include( SubPlugin )
+			expect( Plugin.derivatives.keys ).
+				to include( 'sub', 'subplugin', 'SubPlugin', SubPlugin )
 		end
 
 		it "returns derivatives directly if they're already loaded" do
@@ -156,6 +158,40 @@ describe Pluggability do
 
 			Plugin.load_all
 		end
+
+
+		it "doesn't preload derivatives whose path matches a Regexp exclusion" do
+			expect( Gem ).to receive( :find_files ).with( 'plugins/*.rb' ).
+				and_return([ 'plugins/first.rb' ])
+			expect( Gem ).to receive( :find_files ).with( 'plugins/private/*.rb' ).
+				and_return([ 'plugins/private/second.rb', 'plugins/private/third.rb' ])
+
+			expect( Plugin ).to receive( :require ).with( 'plugins/first.rb' ).
+				and_return( true )
+			expect( Plugin ).to_not receive( :require ).with( 'plugins/private/second.rb' )
+			expect( Plugin ).to_not receive( :require ).with( 'plugins/private/third.rb' )
+
+			Plugin.plugin_exclusions( %r{/private} )
+			Plugin.load_all
+		end
+
+
+		it "doesn't preload derivatives whose path matches a glob String exclusion" do
+			expect( Gem ).to receive( :find_files ).with( 'plugins/*.rb' ).
+				and_return([ 'plugins/first.rb' ])
+			expect( Gem ).to receive( :find_files ).with( 'plugins/private/*.rb' ).
+				and_return([ 'plugins/private/second.rb', 'plugins/private/third.rb' ])
+
+			expect( Plugin ).to receive( :require ).with( 'plugins/first.rb' ).
+				and_return( true )
+			expect( Plugin ).to receive( :require ).with( 'plugins/private/second.rb' ).
+				and_return( true )
+			expect( Plugin ).to_not receive( :require ).with( 'plugins/private/third.rb' )
+
+			Plugin.plugin_exclusions( '**/third.rb' )
+			Plugin.load_all
+		end
+
 	end
 
 
