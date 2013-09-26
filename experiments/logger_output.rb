@@ -6,14 +6,14 @@ BEGIN {
 	require 'pathname'
 	basedir = Pathname.new( __FILE__ ).dirname.parent
 	libdir = basedir + 'lib'
-	
+
 	$LOAD_PATH.unshift( libdir.to_s ) unless $LOAD_PATH.include?( libdir.to_s )
 }
 
 require 'pluggability'
 require 'loggability'
 
-class DataDriver
+class LogReader
 	extend Pluggability
 end
 
@@ -23,7 +23,7 @@ Loggability.level = :debug
 # Or just Pluggability's level:
 Pluggability.logger.level = :debug
 
-DataDriver.create( 'ringbuffer' )
+LogReader.create( 'ringbuffer' )
 
 # $ ruby experiments/logger_output.rb 
 # [2012-08-03 12:23:43.680405 89358/main] debug {} -- Loading derivative ringbuffer

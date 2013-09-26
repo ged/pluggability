@@ -138,10 +138,37 @@ If the plugin is not found, a Pluggability::PluginError is raised, and
 the message will list all the permutations that were tried.
 
 
+=== Preloaded Plugins
+
+Sometimes you don't want to wait for plugins to be loaded on demand. For
+that case, Pluggability provides the load_all[rdoc-ref:Pluggability#load_all]
+method. This will find all possible matches for plugin files and load
+them, returning an Array of all the loaded classes:
+
+    class Template::Tag
+        extend Pluggability
+        plugin_prefixes 'tag'
+    end
+
+    tag_classes = Template::Tag.load_all
+
+
+=== Excluding Some Files
+
+You can also prevent some files from being automatically loaded by
+either create[rdoc-ref:Pluggability#create] or 
+load_all[rdoc-ref:Pluggability#load_all] by setting one or more exclusion
+patterns:
+
+    LogReader.plugin_exclusions 'spec/*', %r{/test/}
+
+The patterns can either be Regexps or glob Strings.
+
+
 === Logging
 
 If you need a little more insight into what's going on, Pluggability
-uses the "Loggability":https://rubygems.org/gems/loggability library.
+uses the Loggability[https://rubygems.org/gems/loggability] library.
 Just set the log level to 'debug' and it'll explain what's going on:
 
     require 'pluggability'
@@ -159,31 +186,30 @@ Just set the log level to 'debug' and it'll explain what's going on:
     
     LogReader.create( 'ringbuffer' )
 
-this might generate a log that looks like:
+this might generate a log that looks (something) like:
 
     [...] debug {} -- Loading derivative ringbuffer
     [...] debug {} -- Subdirs are: [""]
-    [...] debug {} -- Path is: ["ringbuffer_logreader", 
-      "ringbuffer_LogReader", "ringbufferlogreader", 
-      "ringbufferLogReader", "ringbuffer"]...
+    [...] debug {} -- Path is: ["ringbuffer_logreader", "ringbuffer_LogReader",
+      "ringbufferlogreader", "ringbufferLogReader", "ringbuffer"]...
     [...] debug {} -- Trying ringbuffer_logreader...
-    [...] debug {} -- No module at 'ringbuffer_logreader', trying the 
-      next alternative: 'cannot load such file -- ringbuffer_logreader'
+    [...] debug {} -- No module at 'ringbuffer_logreader', trying the next alternative:
+      'cannot load such file -- ringbuffer_logreader'
     [...] debug {} -- Trying ringbuffer_LogReader...
-    [...] debug {} -- No module at 'ringbuffer_LogReader', trying the
-      next alternative: 'cannot load such file -- ringbuffer_LogReader'
+    [...] debug {} -- No module at 'ringbuffer_LogReader', trying the next alternative:
+      'cannot load such file -- ringbuffer_LogReader'
     [...] debug {} -- Trying ringbufferlogreader...
-    [...] debug {} -- No module at 'ringbufferlogreader', trying the
-      next alternative: 'cannot load such file -- ringbufferlogreader'
+    [...] debug {} -- No module at 'ringbufferlogreader', trying the next alternative:
+      'cannot load such file -- ringbufferlogreader'
     [...] debug {} -- Trying ringbufferLogReader...
-    [...] debug {} -- No module at 'ringbufferLogReader', trying the
-      next alternative: 'cannot load such file -- ringbufferLogReader'
+    [...] debug {} -- No module at 'ringbufferLogReader', trying the next alternative:
+      'cannot load such file -- ringbufferLogReader'
     [...] debug {} -- Trying ringbuffer...
-    [...] debug {} -- No module at 'ringbuffer', trying the next
-      alternative: 'cannot load such file -- ringbuffer'
+    [...] debug {} -- No module at 'ringbuffer', trying the next alternative:
+      'cannot load such file -- ringbuffer'
     [...] debug {} -- fatals = []
-    [...] error {} -- Couldn't find a LogReader named 'ringbuffer':
-      tried ["ringbuffer_logreader", "ringbuffer_LogReader", 
+    [...] error {} -- Couldn't find a LogReader named 'ringbuffer': tried 
+      ["ringbuffer_logreader", "ringbuffer_LogReader", 
       "ringbufferlogreader", "ringbufferLogReader", "ringbuffer"]
 
 
