@@ -12,7 +12,7 @@ module Pluggability
 
 
 	# Library version
-	VERSION = '0.2.0'
+	VERSION = '0.3.0'
 
 
 	# An exception class for Pluggability specific errors.

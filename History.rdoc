@@ -1,3 +1,8 @@
+== v0.3.0 [2013-09-25] Michael Granger <ged@FaerieMUD.org>
+
+- Add plugin exclusion patterns
+
+
 == v0.2.0 [2013-03-28] Michael Granger <ged@FaerieMUD.org>
 
 - Fix loading of grandchildren of plugins
