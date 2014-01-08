@@ -143,11 +143,21 @@ module Pluggability
 			Pluggability.log.debug "  no name-based variants for anonymous subclass %p" % [ subclass ]
 		end
 
-		keys.compact.uniq.each do |key|
+		keys.compact!
+		keys.uniq!
+
+		# Register it under each of its name variants
+		keys.each do |key|
 			Pluggability.log.info "Registering %s derivative of %s as %p" %
 				[ subclass.name, plugin_class.name, key ]
 			plugin_class.derivatives[ key ] = subclass
 		end
+
+		# Add a name attribute to it
+		class << subclass
+			attr_reader :plugin_name
+		end
+		subclass.instance_variable_set( :@plugin_name, keys.last )
 
 		super
 	end
