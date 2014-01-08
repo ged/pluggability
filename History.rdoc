@@ -1,3 +1,8 @@
+== v0.4.0 [2014-01-08] Michael Granger <ged@FaerieMUD.org>
+
+- Add a name attribute to plugins for introspection.
+
+
 == v0.3.0 [2013-09-25] Michael Granger <ged@FaerieMUD.org>
 
 - Add plugin exclusion patterns
