@@ -23,9 +23,9 @@ hoespec = Hoe.spec 'pluggability' do
 	self.developer 'Martin Chase', 'stillflame@FaerieMUD.org'
 	self.developer 'Michael Granger', 'ged@FaerieMUD.org'
 
-	self.dependency 'loggability', '~> 0.7'
+	self.dependency 'loggability', '~> 0.8'
 
-	self.dependency 'hoe-deveiate', '~> 0.3', :development
+	self.dependency 'hoe-deveiate', '~> 0.4', :development
 	self.dependency 'hoe-bundler', '~> 1.2', :development
 	self.dependency 'rdoc-generator-fivefish', '~> 0.1', :development
 
