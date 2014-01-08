@@ -207,6 +207,10 @@ describe Pluggability do
 				TestingPlugin.plugin_type
 			}.to raise_error( Pluggability::PluginError, /couldn't find plugin base/i )
 		end
+
+		it "knows what the simplest version of its plugin name is" do
+			expect( TestingPlugin.plugin_name ).to eq( 'testing' )
+		end
 	end
 
 
@@ -220,6 +224,9 @@ describe Pluggability do
 			expect( Plugin.create('black_sheep') ).to be_an_instance_of( BlackSheep )
 		end
 
+		it "knows what the simplest version of its plugin name is" do
+			expect( BlackSheep.plugin_name ).to eq( 'black_sheep' )
+		end
 	end
 
 
@@ -229,6 +236,9 @@ describe Pluggability do
 			expect( Plugin.create('loadable') ).to be_an_instance_of( Test::LoadablePlugin )
 		end
 
+		it "still knows what the simplest version of its plugin name is" do
+			expect( Test::LoadablePlugin.plugin_name ).to eq( 'loadable' )
+		end
 	end
 
 
@@ -238,6 +248,9 @@ describe Pluggability do
 			expect( Plugin.derivatives['subsub'] ).to eq( SubSubPlugin )
 		end
 
+		it "still knows what the simplest version of its plugin name is" do
+			expect( SubSubPlugin.plugin_name ).to eq( 'subsub' )
+		end
 	end
 
 end
