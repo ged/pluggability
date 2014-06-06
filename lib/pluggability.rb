@@ -148,7 +148,7 @@ module Pluggability
 
 		# Register it under each of its name variants
 		keys.each do |key|
-			Pluggability.log.info "Registering %s derivative of %s as %p" %
+			Pluggability.log.debug "Registering %s derivative of %s as %p" %
 				[ subclass.name, plugin_class.name, key ]
 			plugin_class.derivatives[ key ] = subclass
 		end
@@ -249,6 +249,7 @@ module Pluggability
 	### an array of all derivative classes. Load failures are logged but otherwise
 	### ignored.
 	def load_all
+		Pluggability.log.debug "Loading all %p derivatives." % [ self ]
 		patterns = []
 		prefixes = self.plugin_prefixes
 

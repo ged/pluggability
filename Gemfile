@@ -4,14 +4,13 @@
 
 source "https://rubygems.org/"
 
-gem "loggability", "~>0.7"
+gem "loggability", "~>0.8"
 
-gem "hoe-mercurial", "~>1.4.0", :group => [:development, :test]
-gem "hoe-highline", "~>0.1.0", :group => [:development, :test]
+gem "hoe-deveiate", "~>0.6", :group => [:development, :test]
+gem "hoe-mercurial", "~>1.4", :group => [:development, :test]
+gem "hoe-highline", "~>0.2", :group => [:development, :test]
 gem "rdoc", "~>4.0", :group => [:development, :test]
-gem "hoe-deveiate", "~>0.3", :group => [:development, :test]
 gem "hoe-bundler", "~>1.2", :group => [:development, :test]
-gem "rdoc-generator-fivefish", "~>0.1", :group => [:development, :test]
-gem "hoe", "~>3.7", :group => [:development, :test]
+gem "hoe", "~>3.12", :group => [:development, :test]
 
 # vim: syntax=ruby
