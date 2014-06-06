@@ -25,9 +25,8 @@ hoespec = Hoe.spec 'pluggability' do
 
 	self.dependency 'loggability', '~> 0.8'
 
-	self.dependency 'hoe-deveiate', '~> 0.4', :development
+	self.dependency 'hoe-deveiate', '~> 0.6', :development
 	self.dependency 'hoe-bundler', '~> 1.2', :development
-	self.dependency 'rdoc-generator-fivefish', '~> 0.1', :development
 
 	self.license "BSD"
 	self.hg_sign_tags = true if self.respond_to?( :hg_sign_tags= )

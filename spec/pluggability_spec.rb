@@ -95,7 +95,7 @@ describe Pluggability do
 		it "will load new plugins from the require path if they're not loaded yet" do
 			loaded_class = nil
 
-			expect( Plugin ).to receive( :require ).with( 'plugins/dazzle_plugin' ).and_return do |*args|
+			expect( Plugin ).to receive( :require ).with( 'plugins/dazzle_plugin' ) do |*args|
 				loaded_class = Class.new( Plugin )
 				# Simulate a named class, since we're not really requiring
 				Plugin.derivatives['dazzle'] = loaded_class
@@ -110,9 +110,8 @@ describe Pluggability do
 			"derivative fails" do
 
 			# at least 6 -> 3 variants * 2 paths
-			expect( Plugin ).to receive( :require ).
-				at_least(6).times.
-				and_return {|path| raise LoadError, "path" }
+			expect( Plugin ).to receive( :require ).at_least(6).times.
+				and_raise( LoadError.new("path") )
 
 			expect {
 				Plugin.create('scintillating')
