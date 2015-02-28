@@ -1,11 +1,18 @@
 #!/usr/bin/env rake
 
-require 'hoe'
+require 'rake/clean'
 
-Hoe.plugin :deveiate
+begin
+	require 'hoe'
+rescue LoadError
+	abort "This Rakefile requires 'hoe' (gem install hoe)"
+end
+
+GEMSPEC = 'loggability.gemspec'
+
 Hoe.plugin :mercurial
 Hoe.plugin :signing
-Hoe.plugin :bundler
+Hoe.plugin :deveiate
 
 Hoe.plugins.delete :rubyforge
 
@@ -34,12 +41,44 @@ hoespec = Hoe.spec 'pluggability' do
 	self.rdoc_locations << "deveiate:/usr/local/www/public/code/#{remote_rdoc_dir}"
 end
 
-task :gem do
-	hoespec.spec.rdoc_options.delete( '-f' )
-	hoespec.spec.rdoc_options.delete( 'fivefish' )
-end
-
 ENV['VERSION'] ||= hoespec.spec.version.to_s
 
-task 'hg:precheckin' => [ :check_history, :check_manifest, :spec ]
+# Ensure the specs pass before checking in
+task 'hg:precheckin' => [ :check_history, :check_manifest, :gemspec, :spec ]
+
+
+desc "Build a coverage report"
+task :coverage do
+	ENV["COVERAGE"] = 'yes'
+	Rake::Task[:spec].invoke
+end
+CLOBBER.include( 'coverage' )
+
+
+# Use the fivefish formatter for docs generated from development checkout
+if File.directory?( '.hg' )
+	require 'rdoc/task'
+
+	Rake::Task[ 'docs' ].clear
+	RDoc::Task.new( 'docs' ) do |rdoc|
+	    rdoc.main = "README.rdoc"
+	    rdoc.rdoc_files.include( "*.rdoc", "ChangeLog", "lib/**/*.rb" )
+	    rdoc.generator = :fivefish
+		rdoc.title = "Pluggability"
+	    rdoc.rdoc_dir = 'doc'
+	end
+end
+
+task :gemspec => GEMSPEC
+file GEMSPEC => __FILE__
+task GEMSPEC do |task|
+	spec = $hoespec.spec
+	spec.files.delete( '.gemtest' )
+	spec.version = "#{spec.version.bump}.0.pre#{Time.now.strftime("%Y%m%d%H%M%S")}"
+	File.open( task.name, 'w' ) do |fh|
+		fh.write( spec.to_ruby )
+	end
+end
+
+CLOBBER.include( GEMSPEC.to_s )
 
