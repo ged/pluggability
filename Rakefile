@@ -8,7 +8,7 @@ rescue LoadError
 	abort "This Rakefile requires 'hoe' (gem install hoe)"
 end
 
-GEMSPEC = 'loggability.gemspec'
+GEMSPEC = 'pluggability.gemspec'
 
 Hoe.plugin :mercurial
 Hoe.plugin :signing
