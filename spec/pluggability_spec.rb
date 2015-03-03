@@ -143,9 +143,9 @@ describe Pluggability do
 
 
 		it "can preload all of its derivatives" do
-			expect( Gem ).to receive( :find_files ).with( 'plugins/*.rb' ).
+			expect( Gem ).to receive( :find_latest_files ).with( 'plugins/*.rb' ).
 				and_return([ 'plugins/first.rb' ])
-			expect( Gem ).to receive( :find_files ).with( 'plugins/private/*.rb' ).
+			expect( Gem ).to receive( :find_latest_files ).with( 'plugins/private/*.rb' ).
 				and_return([ 'plugins/private/second.rb', 'plugins/private/third.rb' ])
 
 			expect( Plugin ).to receive( :require ).with( 'plugins/first.rb' ).
@@ -160,9 +160,9 @@ describe Pluggability do
 
 
 		it "doesn't preload derivatives whose path matches a Regexp exclusion" do
-			expect( Gem ).to receive( :find_files ).with( 'plugins/*.rb' ).
+			expect( Gem ).to receive( :find_latest_files ).with( 'plugins/*.rb' ).
 				and_return([ 'plugins/first.rb' ])
-			expect( Gem ).to receive( :find_files ).with( 'plugins/private/*.rb' ).
+			expect( Gem ).to receive( :find_latest_files ).with( 'plugins/private/*.rb' ).
 				and_return([ 'plugins/private/second.rb', 'plugins/private/third.rb' ])
 
 			expect( Plugin ).to receive( :require ).with( 'plugins/first.rb' ).
@@ -176,9 +176,9 @@ describe Pluggability do
 
 
 		it "doesn't preload derivatives whose path matches a glob String exclusion" do
-			expect( Gem ).to receive( :find_files ).with( 'plugins/*.rb' ).
+			expect( Gem ).to receive( :find_latest_files ).with( 'plugins/*.rb' ).
 				and_return([ 'plugins/first.rb' ])
-			expect( Gem ).to receive( :find_files ).with( 'plugins/private/*.rb' ).
+			expect( Gem ).to receive( :find_latest_files ).with( 'plugins/private/*.rb' ).
 				and_return([ 'plugins/private/second.rb', 'plugins/private/third.rb' ])
 
 			expect( Plugin ).to receive( :require ).with( 'plugins/first.rb' ).
