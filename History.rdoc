@@ -1,3 +1,11 @@
+== v0.4.1 [2015-03-03] Mahlon E. Smith <mahlon@martini.nu>
+
+Bugfix:
+
+- Only consider the latest versions of each installed gem
+  when finding files to load for .load_all.
+
+
 == v0.4.0 [2014-01-08] Michael Granger <ged@FaerieMUD.org>
 
 - Add a name attribute to plugins for introspection.
