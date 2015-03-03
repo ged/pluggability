@@ -12,7 +12,7 @@ module Pluggability
 
 
 	# Library version
-	VERSION = '0.4.0'
+	VERSION = '0.4.1'
 
 
 	# An exception class for Pluggability specific errors.
@@ -268,7 +268,7 @@ module Pluggability
 
 		patterns.each do |glob|
 			Pluggability.log.debug "  finding derivatives matching pattern %p" % [ glob ]
-			candidates = Gem.find_files( glob )
+			candidates = Gem.find_latest_files( glob )
 			Pluggability.log.debug "  found %d matching files" % [ candidates.length ]
 			next if candidates.empty?
 
