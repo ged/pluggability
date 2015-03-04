@@ -268,7 +268,11 @@ module Pluggability
 
 		patterns.each do |glob|
 			Pluggability.log.debug "  finding derivatives matching pattern %p" % [ glob ]
-			candidates = Gem.find_latest_files( glob )
+			candidates = if Gem.respond_to?( :find_latest_files )
+					Gem.find_latest_files( glob )
+				else
+					Gem.find_files( glob )
+				end
 			Pluggability.log.debug "  found %d matching files" % [ candidates.length ]
 			next if candidates.empty?
 

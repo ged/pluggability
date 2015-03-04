@@ -21,7 +21,7 @@ hoespec = Hoe.spec 'pluggability' do
 	self.history_file = 'History.rdoc'
 	self.extra_rdoc_files = Rake::FileList[ '*.rdoc' ]
 	self.spec_extras[:rdoc_options] = ['-t', 'Pluggability Toolkit']
-	self.spec_extras[:required_rubygems_version] = '~> 2.1'
+	# self.spec_extras[:required_rubygems_version] = '~> 2.1'
 
 	# Hoops to avoid adding a formatting to the gem's spec, but still build
 	# with a custom formatter locally
