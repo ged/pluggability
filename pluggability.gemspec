@@ -1,9 +1,9 @@
 # -*- encoding: utf-8 -*-
-# stub: pluggability 0.5.0.pre20150304113541 ruby lib
+# stub: pluggability 0.5.0.pre20150304135250 ruby lib
 
 Gem::Specification.new do |s|
   s.name = "pluggability"
-  s.version = "0.5.0.pre20150304113541"
+  s.version = "0.5.0.pre20150304135250"
 
   s.required_rubygems_version = Gem::Requirement.new("> 1.3.1") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
