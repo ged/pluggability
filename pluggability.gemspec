@@ -1,14 +1,15 @@
 # -*- encoding: utf-8 -*-
-# stub: pluggability 0.5.0.pre20150303150704 ruby lib
+# stub: pluggability 0.5.0.pre20150304113541 ruby lib
 
 Gem::Specification.new do |s|
   s.name = "pluggability"
-  s.version = "0.5.0.pre20150303150704"
+  s.version = "0.5.0.pre20150304113541"
 
   s.required_rubygems_version = Gem::Requirement.new("> 1.3.1") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["Martin Chase", "Michael Granger"]
-  s.date = "2015-03-03"
+  s.cert_chain = ["/Users/ged/.gem/ged-public_gem_cert.pem"]
+  s.date = "2015-03-04"
   s.description = "Pluggability is a mixin module that turns an including class into a\nfactory for its derivatives, capable of searching for and loading them\nby name. This is useful when you have an abstract base class which\ndefines an interface and basic functionality for a part of a larger\nsystem, and a collection of subclasses which implement the interface for\ndifferent underlying functionality.\n\nAn example of where this might be useful is in a program which generates\noutput with a 'driver' object, which provides a unified interface but\ngenerates different kinds of output.\n\nFirst the abstract base class, which is extended with Pluggability:\n\n    # in mygem/driver.rb:\n    require 'pluggability'\n    require 'mygem' unless defined?( MyGem )\n    \n    class MyGem::Driver\n        extend Pluggability\n        plugin_prefixes \"drivers\", \"drivers/compat\"\n    end\n\nWe can have one driver that outputs PDF documents:\n\n    # mygem/drivers/pdf.rb:\n    require 'mygem/driver' unless defined?( MyGem::Driver )\n    \n    class MyGem::Driver::PDF < Driver\n        ...implementation...\n    end\n\nand another that outputs plain ascii text:\n\n    #mygem/drivers/ascii.rb:\n    require 'mygem/driver' unless defined?( MyGem::Driver )\n    \n    class MyGem::Driver::ASCII < Driver\n        ...implementation...\n    end\n\nNow the driver is configurable by the end-user, who can just set\nit by its short name:\n\n    require 'mygem'\n    \n    config[:driver_type] #=> \"pdf\"\n    driver = MyGem::Driver.create( config[:driver_type] )\n    driver.class #=> MyGem::Driver::PDF\n\n    # You can also pass arguments to the constructor, too:\n    ascii_driver = MyGem::Driver.create( :ascii, :columns => 80 )"
   s.email = ["stillflame@FaerieMUD.org", "ged@FaerieMUD.org"]
   s.extra_rdoc_files = ["History.rdoc", "Manifest.txt", "README.rdoc", "History.rdoc", "README.rdoc"]
