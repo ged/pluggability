@@ -33,6 +33,7 @@ hoespec = Hoe.spec 'pluggability' do |spec|
 
 	spec.dependency 'loggability', '~> 0.12'
 	spec.dependency 'hoe-deveiate', '~> 0.9', :development
+	spec.dependency 'rdoc', '~> 5.1', :development
 
 	spec.require_ruby_version( '>=2.3.4' )
 	spec.hg_sign_tags = true if spec.respond_to?( :hg_sign_tags= )
@@ -69,8 +70,7 @@ if File.directory?( '.hg' )
 	end
 end
 
-task :gemspec => GEMSPEC
-file GEMSPEC => __FILE__
+task :gemspec => [ 'ChangeLog', __FILE__, 'Manifest.txt', GEMSPEC ]
 task GEMSPEC do |task|
 	spec = $hoespec.spec
 	spec.files.delete( '.gemtest' )
@@ -82,4 +82,6 @@ task GEMSPEC do |task|
 end
 
 CLOBBER.include( GEMSPEC.to_s )
+
+task :default => :gemspec
 

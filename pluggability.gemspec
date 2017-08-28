@@ -1,9 +1,9 @@
 # -*- encoding: utf-8 -*-
-# stub: pluggability 0.5.0.pre20170828141222 ruby lib
+# stub: pluggability 0.5.0.pre20170828153616 ruby lib
 
 Gem::Specification.new do |s|
   s.name = "pluggability".freeze
-  s.version = "0.5.0.pre20170828141222"
+  s.version = "0.5.0.pre20170828153616"
 
   s.required_rubygems_version = Gem::Requirement.new("> 1.3.1".freeze) if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib".freeze]
@@ -28,14 +28,14 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<hoe-mercurial>.freeze, ["~> 1.4"])
       s.add_development_dependency(%q<hoe-deveiate>.freeze, ["~> 0.9"])
       s.add_development_dependency(%q<hoe-highline>.freeze, ["~> 0.2"])
-      s.add_development_dependency(%q<rdoc>.freeze, ["~> 4.0"])
+      s.add_development_dependency(%q<rdoc>.freeze, ["~> 5.1"])
       s.add_development_dependency(%q<hoe>.freeze, ["~> 3.16"])
     else
       s.add_dependency(%q<loggability>.freeze, ["~> 0.12"])
       s.add_dependency(%q<hoe-mercurial>.freeze, ["~> 1.4"])
       s.add_dependency(%q<hoe-deveiate>.freeze, ["~> 0.9"])
       s.add_dependency(%q<hoe-highline>.freeze, ["~> 0.2"])
-      s.add_dependency(%q<rdoc>.freeze, ["~> 4.0"])
+      s.add_dependency(%q<rdoc>.freeze, ["~> 5.1"])
       s.add_dependency(%q<hoe>.freeze, ["~> 3.16"])
     end
   else
@@ -43,7 +43,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<hoe-mercurial>.freeze, ["~> 1.4"])
     s.add_dependency(%q<hoe-deveiate>.freeze, ["~> 0.9"])
     s.add_dependency(%q<hoe-highline>.freeze, ["~> 0.2"])
-    s.add_dependency(%q<rdoc>.freeze, ["~> 4.0"])
+    s.add_dependency(%q<rdoc>.freeze, ["~> 5.1"])
     s.add_dependency(%q<hoe>.freeze, ["~> 3.16"])
   end
 end
