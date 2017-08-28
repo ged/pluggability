@@ -29,23 +29,15 @@ class SubSubPlugin < SubPlugin; end
 #
 describe Pluggability do
 
-	before( :all ) do
-		setup_logging()
-	end
-
 	before( :each ) do
 		Plugin.plugin_exclusions = []
 	end
 
-	after( :all ) do
-		reset_logging()
-	end
 
 
 	it "allows extended objects to declare one or more prefixes to use when requiring derviatives" do
 		expect( Plugin.plugin_prefixes ).to eq( ['plugins', 'plugins/private'] )
 	end
-
 
 
 	context "-extended class" do
@@ -55,6 +47,7 @@ describe Pluggability do
 				to include( 'sub', 'subplugin', 'SubPlugin', SubPlugin )
 		end
 
+
 		it "returns derivatives directly if they're already loaded" do
 			class AlreadyLoadedPlugin < Plugin; end
 			expect( Kernel ).to_not receive( :require )
@@ -63,6 +56,7 @@ describe Pluggability do
 			expect( Plugin.create('AlreadyLoadedPlugin') ).to be_an_instance_of( AlreadyLoadedPlugin )
 			expect( Plugin.create(AlreadyLoadedPlugin) ).to be_an_instance_of( AlreadyLoadedPlugin )
 		end
+
 
 		it "filters errors that happen when creating an instance of derivatives so they " +
 			"point to the right place" do
@@ -83,6 +77,7 @@ describe Pluggability do
 
 			expect( exception.backtrace.first ).to match(/#{__FILE__}/)
 		end
+
 
 		it "will refuse to create an object other than one of its derivatives" do
 			class Doppelgaenger; end
@@ -200,12 +195,14 @@ describe Pluggability do
 			expect( TestingPlugin.plugin_type ).to eq( 'Plugin' )
 		end
 
+
 		it "raises a PluginError if it can't figure out what type of factory loads it" do
 			allow( TestingPlugin ).to receive( :ancestors ).and_return( [] )
 			expect {
 				TestingPlugin.plugin_type
 			}.to raise_error( Pluggability::PluginError, /couldn't find plugin base/i )
 		end
+
 
 		it "knows what the simplest version of its plugin name is" do
 			expect( TestingPlugin.plugin_name ).to eq( 'testing' )
@@ -219,9 +216,11 @@ describe Pluggability do
 			expect( Plugin.create('blacksheep') ).to be_an_instance_of( BlackSheep )
 		end
 
+
 		it "is loadable via its underbarred name" do
 			expect( Plugin.create('black_sheep') ).to be_an_instance_of( BlackSheep )
 		end
+
 
 		it "knows what the simplest version of its plugin name is" do
 			expect( BlackSheep.plugin_name ).to eq( 'black_sheep' )
@@ -235,9 +234,11 @@ describe Pluggability do
 			expect( Plugin.create('loadable') ).to be_an_instance_of( Test::LoadablePlugin )
 		end
 
+
 		it "still knows what the simplest version of its plugin name is" do
 			expect( Test::LoadablePlugin.plugin_name ).to eq( 'loadable' )
 		end
+
 	end
 
 
@@ -247,9 +248,11 @@ describe Pluggability do
 			expect( Plugin.derivatives['subsub'] ).to eq( SubSubPlugin )
 		end
 
+
 		it "still knows what the simplest version of its plugin name is" do
 			expect( SubSubPlugin.plugin_name ).to eq( 'subsub' )
 		end
+
 	end
 
 end
