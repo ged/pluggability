@@ -1,22 +1,32 @@
-= pluggability
+# pluggability
 
-project:: https://bitbucket.org/ged/pluggability
-docs   :: http://deveiate.org/code/pluggability
-github :: http://github.com/ged/pluggability
+project
+: https://bitbucket.org/ged/pluggability
+
+docs
+: http://deveiate.org/code/pluggability
+
+github
+: http://github.com/ged/pluggability
 
 
-== Description
+## Description
 
-Pluggability is a mixin module that turns an including class into a
-factory for its derivatives, capable of searching for and loading them
-by name. This is useful when you have an abstract base class which
-defines an interface and basic functionality for a part of a larger
-system, and a collection of subclasses which implement the interface for
-different underlying functionality.
+Pluggability is a toolkit for creating plugins.
 
-An example of where this might be useful is in a program which generates
-output with a 'driver' object, which provides a unified interface but
-generates different kinds of output.
+It provides a mixin that extends your class with methods to load and instantiate its subclasses by name. So instead of:
+
+    require 'acme/adapter/png'
+    png_adapter = Acme::Adapter::PNG.new( 'file.png' )
+  
+you can do:
+
+    require 'acme/adapter'
+    png_adapter = Acme::Adapter.create( :png, 'file.png' )
+
+A full example of where this might be useful is in a program which generates
+output with a 'driver' object, which provides a unified interface but generates
+different kinds of output.
 
 First the abstract base class, which is extended with Pluggability:
 
@@ -26,7 +36,7 @@ First the abstract base class, which is extended with Pluggability:
     
     class MyGem::Driver
         extend Pluggability
-        plugin_prefixes "drivers", "drivers/compat"
+        plugin_prefixes "mygem/drivers"
     end
 
 We can have one driver that outputs PDF documents:
@@ -60,14 +70,13 @@ it by its short name:
     ascii_driver = MyGem::Driver.create( :ascii, :columns => 80 )
 
 
-=== How Plugins Are Loaded
+### How Plugins Are Loaded
 
-The +create+ class method added to your class by Pluggability searches
-for your module using several different strategies. It tries various
-permutations of the base class's name in combination with the derivative
-requested. For example, assume we want to make a +LogReader+ base
-class, and then use plugins to define readers for different log
-formats:
+The `create` class method added to your class by Pluggability searches for your
+module using several different strategies. It tries various permutations of the
+base class's name in combination with the derivative requested. For example,
+assume we want to make a `LogReader` base class, and then use plugins to define
+readers for different log formats:
 
     require 'pluggability'
     
@@ -88,11 +97,10 @@ Pluggability searches for modules with the following names:
     apache_log_reader
     apache
  
-Obviously the last one might load something other than what is intended,
-so you can also tell Pluggability that plugins should be loaded from a
-subdirectory by declaring one or more +plugin_prefixes+ in the base
-class. Each prefix will be tried (in the order they're declared) when
-searching for a subclass:
+Obviously the last one might load something other than what is intended, so you
+can also tell Pluggability that plugins should be loaded from a subdirectory by
+declaring one or more `plugin_prefixes` in the base class. Each prefix will be
+tried (in the order they're declared) when searching for a subclass:
 
     class LogReader
         extend Pluggability
@@ -134,16 +142,16 @@ will change the search to include:
     'logreader/apache'
     'logreader/Apache'
 
-If the plugin is not found, a Pluggability::PluginError is raised, and
-the message will list all the permutations that were tried.
+If the plugin is not found, a Pluggability::PluginError is raised, and the
+message will list all the permutations that were tried.
 
 
-=== Preloaded Plugins
+### Preloaded Plugins
 
-Sometimes you don't want to wait for plugins to be loaded on demand. For
-that case, Pluggability provides the load_all[rdoc-ref:Pluggability#load_all]
-method. This will find all possible matches for plugin files and load
-them, returning an Array of all the loaded classes:
+Sometimes you don't want to wait for plugins to be loaded on demand. For that
+case, Pluggability provides the Pluggability#load_all method. This will find
+all possible matches for plugin files and load them, returning an Array of all
+the loaded classes:
 
     class Template::Tag
         extend Pluggability
@@ -153,11 +161,10 @@ them, returning an Array of all the loaded classes:
     tag_classes = Template::Tag.load_all
 
 
-=== Excluding Some Files
+### Excluding Some Files
 
-You can also prevent some files from being automatically loaded by
-either create[rdoc-ref:Pluggability#create] or 
-load_all[rdoc-ref:Pluggability#load_all] by setting one or more exclusion
+You can also prevent some files from being automatically loaded by either
+Pluggability#create or Pluggability#load_all by setting one or more exclusion
 patterns:
 
     LogReader.plugin_exclusions 'spec/*', %r{/test/}
@@ -165,11 +172,11 @@ patterns:
 The patterns can either be Regexps or glob Strings.
 
 
-=== Logging
+### Logging
 
-If you need a little more insight into what's going on, Pluggability
-uses the Loggability[https://rubygems.org/gems/loggability] library.
-Just set the log level to 'debug' and it'll explain what's going on:
+If you need a little more insight into what's going on, Pluggability uses the
+[Loggability](https://rubygems.org/gems/loggability) library. Just set the log
+level to 'debug' and it'll explain what's going on:
 
     require 'pluggability'
     require 'loggability'
@@ -213,16 +220,16 @@ this might generate a log that looks (something) like:
       "ringbufferlogreader", "ringbufferLogReader", "ringbuffer"]
 
 
-== Installation
+## Installation
 
     gem install pluggability
 
 
-== Contributing
+## Contributing
 
 You can check out the current development source with Mercurial via its
-{Mercurial repo}[https://bitbucket.org/ged/pluggability]. Or if you
-prefer Git, via {its Github mirror}[https://github.com/ged/pluggability].
+[Mercurial repo](https://bitbucket.org/ged/pluggability). Or if you prefer Git,
+via [its Github mirror](https://github.com/ged/pluggability).
 
 After checking out the source, run:
 
@@ -232,9 +239,9 @@ This task will install any missing dependencies, run the tests/specs,
 and generate the API documentation.
 
 
-== License
+## License
 
-Copyright (c) 2008-2013, Michael Granger and Martin Chase
+Copyright (c) 2008-2017, Michael Granger and Martin Chase
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

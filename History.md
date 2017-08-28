@@ -1,18 +1,18 @@
-== v0.4.3 [2015-03-04] Michael Granger <ged@FaerieMUD.org>
+## v0.4.3 [2015-03-04] Michael Granger <ged@FaerieMUD.org>
 
 Bugfix:
 
 - Add a workaround for older Rubygems to avoid Bundler problems.
 
 
-== v0.4.2 [2015-03-04] Michael Granger <ged@FaerieMUD.org>
+## v0.4.2 [2015-03-04] Michael Granger <ged@FaerieMUD.org>
 
 Bugfixes:
 
 - Set the minimum Rubygems version for #find_latest_files support [#1].
 
 
-== v0.4.1 [2015-03-03] Mahlon E. Smith <mahlon@martini.nu>
+## v0.4.1 [2015-03-03] Mahlon E. Smith <mahlon@martini.nu>
 
 Bugfix:
 
@@ -20,35 +20,35 @@ Bugfix:
   when finding files to load for .load_all.
 
 
-== v0.4.0 [2014-01-08] Michael Granger <ged@FaerieMUD.org>
+## v0.4.0 [2014-01-08] Michael Granger <ged@FaerieMUD.org>
 
 - Add a name attribute to plugins for introspection.
 
 
-== v0.3.0 [2013-09-25] Michael Granger <ged@FaerieMUD.org>
+## v0.3.0 [2013-09-25] Michael Granger <ged@FaerieMUD.org>
 
 - Add plugin exclusion patterns
 
 
-== v0.2.0 [2013-03-28] Michael Granger <ged@FaerieMUD.org>
+## v0.2.0 [2013-03-28] Michael Granger <ged@FaerieMUD.org>
 
 - Fix loading of grandchildren of plugins
 - Rename Pluggability::FactoryError to 
   Pluggability::PluginError (with backward-compatibility aliases)
 
 
-== v0.1.0 [2013-03-27] Michael Granger <ged@FaerieMUD.org>
+## v0.1.0 [2013-03-27] Michael Granger <ged@FaerieMUD.org>
 
 - Add loading via underbarred name variants (CommaDelimitedThing ->
   comma_delimited)
 - Rename some stuff for consistency.
 
-== v0.0.2 [2012-08-13] Michael Granger <ged@FaerieMUD.org>
+## v0.0.2 [2012-08-13] Michael Granger <ged@FaerieMUD.org>
 
 Simplify Pluggability#derivatives.
 
 
-== v0.0.1 [2012-08-03] Michael Granger <ged@FaerieMUD.org>
+## v0.0.1 [2012-08-03] Michael Granger <ged@FaerieMUD.org>
 
 First release after renaming from PluginFactory.
 

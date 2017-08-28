@@ -16,30 +16,29 @@ Hoe.plugin :deveiate
 
 Hoe.plugins.delete :rubyforge
 
-hoespec = Hoe.spec 'pluggability' do
-	self.readme_file = 'README.rdoc'
-	self.history_file = 'History.rdoc'
-	self.extra_rdoc_files = Rake::FileList[ '*.rdoc' ]
-	self.spec_extras[:rdoc_options] = ['-t', 'Pluggability Toolkit']
-	# self.spec_extras[:required_rubygems_version] = '~> 2.1'
+hoespec = Hoe.spec 'pluggability' do |spec|
+	spec.readme_file = 'README.md'
+	spec.history_file = 'History.md'
+	spec.extra_rdoc_files = Rake::FileList[ '*.rdoc', '*.md' ]
+	spec.license 'BSD-3-Clause'
+	spec.urls = {
+		home:   'http://deveiate.org/projects/pluggability',
+		code:   'http://bitbucket.org/ged/pluggability',
+		docs:   'http://deveiate.org/code/pluggability',
+		github: 'http://github.com/ged/pluggability',
+	}
 
-	# Hoops to avoid adding a formatting to the gem's spec, but still build
-	# with a custom formatter locally
-	self.spec_extras[:rdoc_options] += [ '-f', 'fivefish' ] if
-		File.directory?( '.hg' ) && !(ARGV.include?('gem') || ARGV.include?('release'))
+	spec.developer 'Martin Chase', 'stillflame@FaerieMUD.org'
+	spec.developer 'Michael Granger', 'ged@FaerieMUD.org'
 
-	self.developer 'Martin Chase', 'stillflame@FaerieMUD.org'
-	self.developer 'Michael Granger', 'ged@FaerieMUD.org'
+	spec.dependency 'loggability', '~> 0.12'
+	spec.dependency 'hoe-deveiate', '~> 0.9', :development
 
-	self.dependency 'loggability', '~> 0.8'
+	spec.require_ruby_version( '>=2.3.4' )
+	spec.hg_sign_tags = true if spec.respond_to?( :hg_sign_tags= )
+	spec.check_history_on_release = true if spec.respond_to?( :check_history_on_release= )
 
-	self.dependency 'hoe-deveiate', '~> 0.6', :development
-	self.dependency 'hoe-bundler', '~> 1.2', :development
-
-	self.license "BSD"
-	self.hg_sign_tags = true if self.respond_to?( :hg_sign_tags= )
-	self.check_history_on_release = true if self.respond_to?( :check_history_on_release= )
-	self.rdoc_locations << "deveiate:/usr/local/www/public/code/#{remote_rdoc_dir}"
+	spec.rdoc_locations << "deveiate:/usr/local/www/public/code/#{remote_rdoc_dir}"
 end
 
 ENV['VERSION'] ||= hoespec.spec.version.to_s
