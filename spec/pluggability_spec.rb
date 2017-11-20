@@ -50,7 +50,7 @@ describe Pluggability do
 
 		it "returns derivatives directly if they're already loaded" do
 			class AlreadyLoadedPlugin < Plugin; end
-			expect( Kernel ).to_not receive( :require )
+			expect( Kernel ).to_not receive( :load )
 			expect( Plugin.create('alreadyloaded') ).to be_an_instance_of( AlreadyLoadedPlugin )
 			expect( Plugin.create('AlreadyLoaded') ).to be_an_instance_of( AlreadyLoadedPlugin )
 			expect( Plugin.create('AlreadyLoadedPlugin') ).to be_an_instance_of( AlreadyLoadedPlugin )
@@ -90,7 +90,10 @@ describe Pluggability do
 		it "will load new plugins from the require path if they're not loaded yet" do
 			loaded_class = nil
 
-			expect( Plugin ).to receive( :require ).with( 'plugins/dazzle_plugin' ) do |*args|
+			expect( Gem ).to receive( :find_latest_files ).
+				at_least( :once ).
+				and_return( ['/some/path/to/plugins/dazzle.rb'] )
+			expect( Kernel ).to receive( :load ).with( '/some/path/to/plugins/dazzle.rb' ) do |*args|
 				loaded_class = Class.new( Plugin )
 				# Simulate a named class, since we're not really requiring
 				Plugin.derivatives['dazzle'] = loaded_class
@@ -105,8 +108,8 @@ describe Pluggability do
 			"derivative fails" do
 
 			# at least 6 -> 3 variants * 2 paths
-			expect( Plugin ).to receive( :require ).at_least(6).times.
-				and_raise( LoadError.new("path") )
+			expect( Gem ).to receive( :find_latest_files ).at_least( 6 ).times.
+				and_return( [] )
 
 			expect {
 				Plugin.create('scintillating')
@@ -115,8 +118,12 @@ describe Pluggability do
 
 
 		it "will output a sensible description when a require succeeds, but it loads something unintended" do
-			# at least 6 -> 3 variants * 2 paths
-			expect( Plugin ).to receive( :require ).and_return( true )
+			expect( Gem ).to receive( :find_latest_files ).
+				at_least( :once ).
+				and_return( ['/some/path/to/corruscating.rb'] )
+			expect( Kernel ).to receive( :load ).
+				with( '/some/path/to/corruscating.rb' ).
+				and_return( true )
 
 			expect {
 				Plugin.create('corruscating')
@@ -124,15 +131,16 @@ describe Pluggability do
 		end
 
 
-		it "will re-raise the first exception raised when attempting to load a " +
-			"derivative if none of the paths work" do
-
-			# at least 6 -> 3 variants * 2 paths
-			expect( Plugin ).to receive( :require ).at_least(6).times.
+		it "doesn't rescue LoadErrors raised when loading the plugin" do
+			expect( Gem ).to receive( :find_latest_files ).
+				at_least( :once ).
+				and_return( ['/some/path/to/portable.rb'] )
+			expect( Kernel ).to receive( :load ).
+				with( '/some/path/to/portable.rb' ).
 				and_raise( ScriptError.new("error while parsing path") )
 
 			expect {
-				Plugin.create('portable')
+				Plugin.create( 'portable' )
 			}.to raise_error( ScriptError, /error while parsing/ )
 		end
 
@@ -143,11 +151,11 @@ describe Pluggability do
 			expect( Gem ).to receive( :find_latest_files ).with( 'plugins/private/*.rb' ).
 				and_return([ 'plugins/private/second.rb', 'plugins/private/third.rb' ])
 
-			expect( Plugin ).to receive( :require ).with( 'plugins/first.rb' ).
+			expect( Kernel ).to receive( :load ).with( 'plugins/first.rb' ).
 				and_return( true )
-			expect( Plugin ).to receive( :require ).with( 'plugins/private/second.rb' ).
+			expect( Kernel ).to receive( :load ).with( 'plugins/private/second.rb' ).
 				and_return( true )
-			expect( Plugin ).to receive( :require ).with( 'plugins/private/third.rb' ).
+			expect( Kernel ).to receive( :load ).with( 'plugins/private/third.rb' ).
 				and_return( true )
 
 			Plugin.load_all
@@ -156,14 +164,14 @@ describe Pluggability do
 
 		it "doesn't preload derivatives whose path matches a Regexp exclusion" do
 			expect( Gem ).to receive( :find_latest_files ).with( 'plugins/*.rb' ).
-				and_return([ 'plugins/first.rb' ])
+				and_return([ '/path/to/plugins/first.rb' ])
 			expect( Gem ).to receive( :find_latest_files ).with( 'plugins/private/*.rb' ).
-				and_return([ 'plugins/private/second.rb', 'plugins/private/third.rb' ])
+				and_return([ '/path/to/plugins/private/second.rb', '/path/to/plugins/private/third.rb' ])
 
-			expect( Plugin ).to receive( :require ).with( 'plugins/first.rb' ).
+			expect( Kernel ).to receive( :load ).with( '/path/to/plugins/first.rb' ).
 				and_return( true )
-			expect( Plugin ).to_not receive( :require ).with( 'plugins/private/second.rb' )
-			expect( Plugin ).to_not receive( :require ).with( 'plugins/private/third.rb' )
+			expect( Kernel ).to_not receive( :load ).with( '/path/to/plugins/private/second.rb' )
+			expect( Kernel ).to_not receive( :load ).with( '/path/to/plugins/private/third.rb' )
 
 			Plugin.plugin_exclusions( %r{/private} )
 			Plugin.load_all
@@ -176,11 +184,11 @@ describe Pluggability do
 			expect( Gem ).to receive( :find_latest_files ).with( 'plugins/private/*.rb' ).
 				and_return([ 'plugins/private/second.rb', 'plugins/private/third.rb' ])
 
-			expect( Plugin ).to receive( :require ).with( 'plugins/first.rb' ).
+			expect( Kernel ).to receive( :load ).with( 'plugins/first.rb' ).
 				and_return( true )
-			expect( Plugin ).to receive( :require ).with( 'plugins/private/second.rb' ).
+			expect( Kernel ).to receive( :load ).with( 'plugins/private/second.rb' ).
 				and_return( true )
-			expect( Plugin ).to_not receive( :require ).with( 'plugins/private/third.rb' )
+			expect( Kernel ).to_not receive( :load ).with( 'plugins/private/third.rb' )
 
 			Plugin.plugin_exclusions( '**/third.rb' )
 			Plugin.load_all
