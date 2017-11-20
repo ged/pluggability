@@ -278,7 +278,7 @@ module Pluggability
 
 			candidates.each do |path|
 				next if self.is_excluded_path?( path )
-				require( path )
+				Kernel.load( path )
 			end
 		end
 
@@ -286,15 +286,13 @@ module Pluggability
 	end
 
 
-	### Calculates an appropriate filename for the derived class using the
-	### name of the base class and tries to load it via <tt>require</tt>. If
-	### the including class responds to a method named
-	### <tt>derivativeDirs</tt>, its return value (either a String, or an
-	### array of Strings) is added to the list of prefix directories to try
-	### when attempting to require a modules. Eg., if
-	### <tt>class.derivativeDirs</tt> returns <tt>['foo','bar']</tt> the
-	### require line is tried with both <tt>'foo/'</tt> and <tt>'bar/'</tt>
-	### prepended to it.
+	### Calculates an appropriate filename for the derived class using the name of
+	### the base class and tries to load it via <tt>load</tt>. If the including
+	### class responds to a method named <tt>plugin_prefixes</tt>, its return value
+	### (either a String, or an array of Strings) is added to the list of prefix
+	### directories to try when attempting to load modules. Eg., if
+	### <tt>class.plugin_prefixes</tt> returns <tt>['foo','bar']</tt> the require
+	### line is tried with both <tt>'foo/'</tt> and <tt>'bar/'</tt> prepended to it.
 	def load_derivative( class_name )
 		Pluggability.log.debug "Loading derivative #{class_name}"
 
@@ -334,58 +332,49 @@ module Pluggability
 
 
 	### Search for the module with the specified <tt>mod_name</tt>, using any
-	### #plugin_prefixes that have been set.
+	### #plugin_prefixes that have been set. Return the result of +Kernel.load+ing
+	### the first candidate.
 	def require_derivative( mod_name )
-
-		subdirs = self.plugin_prefixes
-		subdirs << '' if subdirs.empty?
-		Pluggability.log.debug "Subdirs are: %p" % [subdirs]
-		fatals = []
-		tries  = []
-
-		# Iterate over the subdirs until we successfully require a
-		# module.
-		subdirs.map( &:strip ).each do |subdir|
-			self.make_require_path( mod_name, subdir ).each do |path|
-				next if self.is_excluded_path?( path )
-
-				Pluggability.logger.debug "Trying #{path}..."
-				tries << path
-
-				# Try to require the module, saving errors and jumping
-				# out of the catch block on success.
-				begin
-					require( path.untaint )
-				rescue LoadError => err
-					Pluggability.log.debug "No module at '%s', trying the next alternative: '%s'" %
-						[ path, err.message ]
-				rescue Exception => err
-					fatals << err
-					Pluggability.log.error "Found '#{path}', but encountered an error: %s\n\t%s" %
-						[ err.message, err.backtrace.join("\n\t") ]
-				else
-					Pluggability.log.info "Loaded '#{path}' without error."
-					return path
-				end
-			end
-		end
-
-		Pluggability.logger.debug "fatals = %p" % [ fatals ]
-
-		# Re-raise is there was a file found, but it didn't load for
-		# some reason.
-		if fatals.empty?
+		plugin_path = self.find_plugin_path( mod_name )
+		unless plugin_path
 			errmsg = "Couldn't find a %s named '%s': tried %p" % [
 				self.plugin_type,
 				mod_name,
-				tries
-			  ]
+				self.plugin_path_candidates( mod_name )
+			]
 			Pluggability.log.error( errmsg )
-			raise PluginError, errmsg
-		else
-			Pluggability.log.debug "Re-raising first fatal error"
-			Kernel.raise( fatals.first )
+			raise Pluggability::PluginError, errmsg
 		end
+
+		Kernel.load( plugin_path.untaint )
+
+		return plugin_path
+	end
+
+
+	### Search for the file that corresponds to +mod_name+ using the plugin prefixes
+	### and current Gem load path and return the path to the first candidate that
+	### exists.
+	def find_plugin_path( mod_name )
+		candidates = self.plugin_path_candidates( mod_name )
+		Pluggability.log.debug "Candidates for %p are: %p" % [ mod_name, candidates ]
+
+		candidate_paths = candidates.
+			flat_map {|path| Gem.find_latest_files( path ) }.
+			reject {|path| self.is_excluded_path?( path ) }
+		Pluggability.log.debug "Valid candidates in the current gemset: %p" % [ candidate_paths ]
+
+		return candidate_paths.first
+	end
+
+
+	### Return an Array of all the filenames a plugin of the given +mod_name+ might
+	### map to given the current plugin_prefixes.
+	def plugin_path_candidates( mod_name )
+		prefixes = self.plugin_prefixes
+		prefixes << '' if prefixes.empty?
+
+		return prefixes.flat_map {|pre| self.make_require_path(mod_name, pre) }
 	end
 
 
