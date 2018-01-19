@@ -31,6 +31,7 @@ describe Pluggability do
 
 	before( :each ) do
 		Plugin.plugin_exclusions = []
+		allow( File ).to receive( :file? ).and_return( true )
 	end
 
 
@@ -145,6 +146,23 @@ describe Pluggability do
 		end
 
 
+		it "ignores directories when finding derivatives" do
+			expect( Gem ).to receive( :find_latest_files ).
+				at_least( :once ).
+				and_return( ['/some/path/to/portable', '/some/path/to/portable.rb'] )
+			expect( File ).to receive( :file? ).and_return( false )
+
+			expect( Kernel ).to_not receive( :load ).with( '/some/path/to/portable' )
+			expect( Kernel ).to receive( :load ).
+				with( '/some/path/to/portable.rb' ).
+				and_return( true )
+
+			expect {
+				Plugin.create( 'portable' )
+			}.to raise_error( Pluggability::PluginError, /Require of '\S+' succeeded, but didn't load a Plugin/i )
+		end
+
+
 		it "can preload all of its derivatives" do
 			expect( Gem ).to receive( :find_latest_files ).with( 'plugins/*.rb' ).
 				and_return([ 'plugins/first.rb' ])
@@ -160,7 +178,6 @@ describe Pluggability do
 
 			Plugin.load_all
 		end
-
 
 		it "doesn't preload derivatives whose path matches a Regexp exclusion" do
 			expect( Gem ).to receive( :find_latest_files ).with( 'plugins/*.rb' ).
