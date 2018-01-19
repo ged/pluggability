@@ -1,3 +1,11 @@
+## v0.5.0 [2018-01-19] Michael Granger <ged@FaerieMUD.org>
+
+Enhancements:
+
+- Update the mechanism used to search for derivatives for more-modern Rubygems,
+  Bundler, etc.
+
+
 ## v0.4.3 [2015-03-04] Michael Granger <ged@FaerieMUD.org>
 
 Bugfix:
