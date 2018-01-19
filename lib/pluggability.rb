@@ -273,6 +273,7 @@ module Pluggability
 				else
 					Gem.find_files( glob )
 				end
+
 			Pluggability.log.debug "  found %d matching files" % [ candidates.length ]
 			next if candidates.empty?
 
@@ -361,7 +362,7 @@ module Pluggability
 
 		candidate_paths = candidates.
 			flat_map {|path| Gem.find_latest_files( path ) }.
-			reject {|path| self.is_excluded_path?( path ) }
+			reject {|path| self.is_excluded_path?( path ) || ! File.file?(path) }
 		Pluggability.log.debug "Valid candidates in the current gemset: %p" % [ candidate_paths ]
 
 		return candidate_paths.first
