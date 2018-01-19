@@ -22,7 +22,7 @@ hoespec = Hoe.spec 'pluggability' do |spec|
 	spec.extra_rdoc_files = Rake::FileList[ '*.rdoc', '*.md' ]
 	spec.license 'BSD-3-Clause'
 	spec.urls = {
-		home:   'http://deveiate.org/projects/pluggability',
+		home:   'http://bitbucket.org/ged/pluggability',
 		code:   'http://bitbucket.org/ged/pluggability',
 		docs:   'http://deveiate.org/code/pluggability',
 		github: 'http://github.com/ged/pluggability',

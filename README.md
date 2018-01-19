@@ -241,7 +241,7 @@ and generate the API documentation.
 
 ## License
 
-Copyright (c) 2008-2017, Michael Granger and Martin Chase
+Copyright (c) 2008-2018, Michael Granger and Martin Chase
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
