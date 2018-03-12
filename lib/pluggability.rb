@@ -279,7 +279,7 @@ module Pluggability
 
 			candidates.each do |path|
 				next if self.is_excluded_path?( path )
-				Kernel.load( path )
+				Kernel.require( path )
 			end
 		end
 
@@ -333,8 +333,7 @@ module Pluggability
 
 
 	### Search for the module with the specified <tt>mod_name</tt>, using any
-	### #plugin_prefixes that have been set. Return the result of +Kernel.load+ing
-	### the first candidate.
+	### #plugin_prefixes that have been set. Return the path that was required.
 	def require_derivative( mod_name )
 		plugin_path = self.find_plugin_path( mod_name )
 		unless plugin_path
@@ -347,7 +346,7 @@ module Pluggability
 			raise Pluggability::PluginError, errmsg
 		end
 
-		Kernel.load( plugin_path.untaint )
+		Kernel.require( plugin_path.untaint )
 
 		return plugin_path
 	end
