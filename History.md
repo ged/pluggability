@@ -1,3 +1,8 @@
+## v0.6.0 [2018-03-12] Michael Granger <ged@FaerieMUD.org>
+
+- Switch back to require for loading derivatives
+
+
 ## v0.5.0 [2018-01-19] Michael Granger <ged@FaerieMUD.org>
 
 Enhancements:
