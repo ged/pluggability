@@ -346,7 +346,7 @@ module Pluggability
 			raise Pluggability::PluginError, errmsg
 		end
 
-		Kernel.require( plugin_path.untaint )
+		Kernel.require( plugin_path )
 
 		return plugin_path
 	end
