@@ -5,4 +5,4 @@ docs/
 ^ChangeLog
 ^release\.(ann|notes)$
 ^doc/
-Gemfile.lock$
+\.lock$

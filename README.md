@@ -1,13 +1,13 @@
 # pluggability
 
-project
-: https://bitbucket.org/ged/pluggability
+home
+: https://hg.sr.ht/~ged/pluggability
 
 docs
-: http://deveiate.org/code/pluggability
+: https://deveiate.org/code/pluggability
 
 github
-: http://github.com/ged/pluggability
+: https://github.com/ged/pluggability
 
 
 ## Description
@@ -239,9 +239,15 @@ This task will install any missing dependencies, run the tests/specs,
 and generate the API documentation.
 
 
+## Authors
+
+- Michael Granger <ged@faeriemud.org>
+- Martin Chase <outofculture@gmail.com>
+
+
 ## License
 
-Copyright (c) 2008-2018, Michael Granger and Martin Chase
+Copyright (c) 2008-2020, Michael Granger and Martin Chase
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
