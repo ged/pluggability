@@ -1,7 +1,7 @@
 # pluggability
 
 home
-: https://hg.sr.ht/~ged/pluggability
+: https://hg.sr.ht/~ged/Pluggability
 
 docs
 : https://deveiate.org/code/pluggability
