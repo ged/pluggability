@@ -1,0 +1,15 @@
+image: freebsd/12.x
+packages:
+  - ruby
+  - rubygem-gems
+  - rubygem-rake
+sources:
+  - hg+https://hg.sr.ht/~ged/Pluggability
+tasks:
+  - setup: |
+      cd Pluggability
+      gem install --user-install -Ng
+  - test: |
+      export PATH=$PATH:$(ruby -r rubygems -e 'puts Gem.user_dir')/bin
+      cd Pluggability
+      COVERAGE=1 rspec -cfd
