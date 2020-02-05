@@ -1,4 +1,17 @@
+# Release History for pluggability
+
+---
+
+## v0.7.0 [2020-02-05] Michael Granger <ged@faeriemud.org>
+
+Improvements:
+
+- Updated for Ruby 2.7
+
+
 ## v0.6.0 [2018-03-12] Michael Granger <ged@FaerieMUD.org>
+
+Bugfix:
 
 - Switch back to require for loading derivatives
 
