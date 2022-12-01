@@ -6,6 +6,9 @@ home
 docs
 : https://deveiate.org/code/pluggability
 
+code
+: https://hg.sr.ht/~ged/Pluggability/browse
+
 github
 : https://github.com/ged/pluggability
 
