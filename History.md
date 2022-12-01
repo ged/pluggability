@@ -1,6 +1,13 @@
 # Release History for pluggability
 
 ---
+## v0.8.0 [2022-12-01] Michael Granger <ged@faeriemud.org>
+
+Improvements:
+
+- Change default Ruby to 3.1
+- Fix support for classes with number in their name
+
 
 ## v0.7.0 [2020-02-05] Michael Granger <ged@faeriemud.org>
 
