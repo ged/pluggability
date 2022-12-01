@@ -1,8 +1,5 @@
-ChangeLog
 History.md
-Manifest.txt
 README.md
-Rakefile
 lib/pluggability.rb
 spec/helpers.rb
 spec/pluggability_spec.rb
