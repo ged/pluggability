@@ -17,6 +17,7 @@ end
 class SubPlugin < Plugin; end
 class TestingPlugin < Plugin; end
 class BlackSheep < Plugin; end
+class Carbon14Robot < Plugin; end
 module Test
 	class LoadablePlugin < Plugin; end
 end
@@ -33,7 +34,6 @@ describe Pluggability do
 		Plugin.plugin_exclusions = []
 		allow( File ).to receive( :file? ).and_return( true )
 	end
-
 
 
 	it "allows extended objects to declare one or more prefixes to use when requiring derviatives" do
@@ -179,6 +179,7 @@ describe Pluggability do
 			Plugin.load_all
 		end
 
+
 		it "doesn't preload derivatives whose path matches a Regexp exclusion" do
 			expect( Gem ).to receive( :find_latest_files ).with( 'plugins/*.rb' ).
 				and_return([ '/path/to/plugins/first.rb' ])
@@ -244,6 +245,11 @@ describe Pluggability do
 
 		it "is loadable via its underbarred name" do
 			expect( Plugin.create('black_sheep') ).to be_an_instance_of( BlackSheep )
+		end
+
+
+		it "works for classes with numbers in them too" do
+			expect( Plugin.create('carbon14_robot') ).to be_an_instance_of( Carbon14Robot )
 		end
 
 

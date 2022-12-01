@@ -170,7 +170,7 @@ module Pluggability
 
 		simple_name = subclass.name.sub( /^.*::/i, '' ).sub( /\W+$/, '' )
 		keys << simple_name << simple_name.downcase
-		keys << simple_name.gsub( /([a-z])([A-Z])/, "\\1_\\2" ).downcase
+		keys << simple_name.gsub( /([a-z0-9])([A-Z])/, "\\1_\\2" ).downcase
 
 		# Handle class names like 'FooBar' for 'Bar' factories.
 		Pluggability.log.debug "Inherited %p for %p-type plugins" % [ subclass, self.plugin_type ]
