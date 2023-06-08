@@ -1,9 +1,9 @@
 # -*- encoding: utf-8 -*-
-# stub: pluggability 0.9.0.pre.20230608081551 ruby lib
+# stub: pluggability 0.10.0.pre.20230608081829 ruby lib
 
 Gem::Specification.new do |s|
   s.name = "pluggability".freeze
-  s.version = "0.9.0.pre.20230608081551"
+  s.version = "0.10.0.pre.20230608081829"
 
   s.required_rubygems_version = Gem::Requirement.new("> 1.3.1".freeze) if s.respond_to? :required_rubygems_version=
   s.metadata = { "bug_tracker_uri" => "https://todo.sr.ht/~ged/Pluggability/browse", "changelog_uri" => "https://deveiate.org/code/pluggability/History_md.html", "documentation_uri" => "https://deveiate.org/code/pluggability", "homepage_uri" => "https://hg.sr.ht/~ged/Pluggability", "source_uri" => "https://hg.sr.ht/~ged/Pluggability/browse" } if s.respond_to? :metadata=

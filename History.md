@@ -1,6 +1,14 @@
 # Release History for pluggability
 
 ---
+
+## v0.9.0 [2023-06-08] Michael Granger <ged@faeriemud.org>
+
+Improvements:
+
+- Add support for keyword arguments.
+
+
 ## v0.8.0 [2022-12-01] Michael Granger <ged@faeriemud.org>
 
 Improvements:
