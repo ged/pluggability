@@ -202,11 +202,11 @@ module Pluggability
 	###   obj = Listener.create( 'FooListener' )
 	###   obj = Listener.create( FooListener )
 	###   obj = Listener.create( 'Foo' )
-	def create( class_name, *args, &block )
+	def create( class_name, *args, **keyword_args, &block )
 		subclass = get_subclass( class_name )
 
 		begin
-			return subclass.new( *args, &block )
+			return subclass.new( *args, **keyword_args, &block )
 		rescue => err
 			nicetrace = err.backtrace.reject {|frame| /#{__FILE__}/ =~ frame}
 			msg = "When creating '#{class_name}': " + err.message

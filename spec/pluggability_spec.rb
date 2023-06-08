@@ -21,6 +21,12 @@ class Carbon14Robot < Plugin; end
 module Test
 	class LoadablePlugin < Plugin; end
 end
+class KeywordTest < Plugin
+	def initialize( **kwargs)
+		@kwargs = kwargs
+	end
+	attr_reader :kwargs
+end
 
 class SubSubPlugin < SubPlugin; end
 
@@ -210,6 +216,12 @@ describe Pluggability do
 
 			Plugin.plugin_exclusions( '**/third.rb' )
 			Plugin.load_all
+		end
+
+
+		it "passes keyword arguments when creating derivatives" do
+			result = Plugin.create( KeywordTest, foo: :bar, baz: 2 )
+			expect( result.kwargs ).to eq({ foo: :bar, baz: 2 })
 		end
 
 	end
