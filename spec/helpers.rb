@@ -1,11 +1,11 @@
-#!/usr/bin/ruby
-# coding: utf-8
+# -*- ruby -*-
 
 require 'rspec'
+require 'diff/lcs'
 require 'loggability/spechelpers'
 require 'pluggability'
 
-### Mock with Rspec
+# Mock with Rspec
 RSpec.configure do |config|
 
 	config.run_all_when_everything_filtered = true
