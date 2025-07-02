@@ -1,7 +1,7 @@
 # -*- ruby -*-
-#encoding: utf-8
 
 require 'loggability' unless defined?( Loggability )
+
 
 # The Pluggability module
 module Pluggability
@@ -18,6 +18,18 @@ module Pluggability
 	# An exception class for Pluggability specific errors.
 	class PluginError < RuntimeError; end
 	FactoryError = PluginError
+
+
+	module StringRefinements
+		refine( String ) do
+
+			def uncamelcase
+				return self.gsub( /([a-z0-9])([A-Z])/, "\\1_\\2" )
+			end
+
+		end
+	end
+	using StringRefinements
 
 
 	### Add the @derivatives instance variable to including classes.
@@ -170,7 +182,7 @@ module Pluggability
 
 		simple_name = subclass.name.sub( /^.*::/i, '' ).sub( /\W+$/, '' )
 		keys << simple_name << simple_name.downcase
-		keys << simple_name.gsub( /([a-z0-9])([A-Z])/, "\\1_\\2" ).downcase
+		keys << simple_name.uncamelcase.downcase
 
 		# Handle class names like 'FooBar' for 'Bar' factories.
 		Pluggability.log.debug "Inherited %p for %p-type plugins" % [ subclass, self.plugin_type ]
@@ -361,6 +373,7 @@ module Pluggability
 
 		candidate_paths = candidates.
 			flat_map {|path| Gem.find_latest_files( path ) }.
+			uniq.
 			reject {|path| self.is_excluded_path?( path ) || ! File.file?(path) }
 		Pluggability.log.debug "Valid candidates in the current gemset: %p" % [ candidate_paths ]
 
@@ -374,7 +387,7 @@ module Pluggability
 		prefixes = self.plugin_prefixes
 		prefixes << '' if prefixes.empty?
 
-		return prefixes.flat_map {|pre| self.make_require_path(mod_name, pre) }
+		return prefixes.flat_map {|pre| self.make_require_path(mod_name, pre) }.uniq
 	end
 
 
@@ -385,17 +398,12 @@ module Pluggability
 	###    "drivers/SocketDataDriver", "drivers/socket", "drivers/Socket"]
 	def make_require_path( modname, subdir )
 		path = []
-		myname = self.plugin_type
+		myname = self.plugin_type.uncamelcase.downcase
+		modname = modname.uncamelcase.downcase
 
 		# Make permutations of the two parts
 		path << modname
-		path << modname.downcase
-		path << modname			       + myname
-		path << modname.downcase       + myname
-		path << modname.downcase       + myname.downcase
-		path << modname			 + '_' + myname
-		path << modname.downcase + '_' + myname
-		path << modname.downcase + '_' + myname.downcase
+		path << modname + '_' + myname
 
 		# If a non-empty subdir was given, prepend it to all the items in the
 		# path

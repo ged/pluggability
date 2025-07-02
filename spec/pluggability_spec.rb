@@ -111,11 +111,30 @@ describe Pluggability do
 		end
 
 
+		it "will load new plugins from the require path if given a camel-cased class name" do
+			loaded_class = nil
+
+			expect( Gem ).to receive( :find_latest_files ).
+				at_least( :once ).
+				and_return( ['/some/path/to/plugins/razzle_dazzle.rb'] )
+			expect( Kernel ).to receive( :require ) do |require_path|
+				expect( require_path ).to eq( '/some/path/to/plugins/razzle_dazzle.rb' )
+
+				loaded_class = Class.new( Plugin )
+				# Simulate a named class, since we're not really requiring
+				Plugin.derivatives['razzledazzle'] = loaded_class
+				true
+			end
+
+			expect( Plugin.create(:RazzleDazzle) ).to be_an_instance_of( loaded_class )
+		end
+
+
 		it "will output a sensible description of what it tried to load if requiring a " +
 			"derivative fails" do
 
 			# at least 6 -> 3 variants * 2 paths
-			expect( Gem ).to receive( :find_latest_files ).at_least( 6 ).times.
+			expect( Gem ).to receive( :find_latest_files ).at_least( 4 ).times.
 				and_return( [] )
 
 			expect {
