@@ -2,6 +2,14 @@
 
 ---
 
+## v0.10.0 [2025-07-12] Michael Granger <ged@faeriemud.org>
+
+Improvements:
+
+- Remove support for non-Ruby idiomatic plugin paths
+- Add support for newer Ruby features, e.g., Module#set_temporary_name.
+
+
 ## v0.9.0 [2023-06-08] Michael Granger <ged@faeriemud.org>
 
 Improvements:
