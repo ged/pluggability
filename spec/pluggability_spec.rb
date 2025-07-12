@@ -5,8 +5,6 @@ require_relative 'helpers'
 require 'pluggability'
 require 'loggability'
 
-Loggability.level = :debug
-
 #
 # Testing classes
 #
@@ -315,7 +313,7 @@ RSpec.describe Pluggability do
 
 
 		it "still knows what the simplest version of its plugin name is" do
-			expect( SubSubPlugin.plugin_name ).to eq( 'subsub' )
+			expect( SubSubPlugin.plugin_name ).to eq( 'sub_sub' )
 		end
 
 	end

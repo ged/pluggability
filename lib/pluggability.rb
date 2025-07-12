@@ -38,6 +38,8 @@ module Pluggability
 		obj.instance_variable_set( :@plugin_exclusions, [] )
 		obj.instance_variable_set( :@derivatives, {} )
 
+		obj.singleton_class.attr_accessor( :plugin_name )
+
 		Pluggability.pluggable_classes << obj
 
 		super
@@ -149,14 +151,16 @@ module Pluggability
 	end
 
 
-	### (Undocumented)
+	### Override Module#set_temporary_name so +new_name+ can be used to derive the
+	### plugin name. Note that this does *not* detect if you later assign the
+	### anonymous class to a constant and thus clear its temporary name.
 	def set_temporary_name( new_name )
 		super
 		self.register_plugin_type( self )
 	end
 
 
-	### (Undocumented)
+	### Register the given +subclass+ as a plugin type of the receiving Pluggable class.
 	def register_plugin_type( subclass )
 		plugin_class = Pluggability.plugin_base_class( subclass )
 		keys = [ subclass ]
@@ -178,11 +182,8 @@ module Pluggability
 			plugin_class.derivatives[ key ] = subclass
 		end
 
-		# Add a name attribute to it
-		class << subclass
-			attr_reader :plugin_name
-		end
-		self.instance_variable_set( :@plugin_name, keys.last )
+		Pluggability.log.debug "Setting plugin name of %p to %p" % [ subclass, keys.last ]
+		subclass.plugin_name = keys.last
 	end
 
 
@@ -191,6 +192,7 @@ module Pluggability
 	def make_derivative_names( subclass )
 		keys = []
 
+		# Order is important here, as the last non-nil one becomes the plugin_name.
 		simple_name = subclass.name.sub( /\A.*::/, '' ).sub( /\A(\w+).*/, '\\1' )
 		keys << simple_name << simple_name.downcase
 		keys << simple_name.uncamelcase.downcase
