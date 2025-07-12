@@ -6,3 +6,4 @@ docs/
 ^release\.(ann|notes)$
 ^doc/
 \.lock$
+spec/\.status

@@ -3,7 +3,9 @@
 require_relative 'helpers'
 
 require 'pluggability'
+require 'loggability'
 
+Loggability.level = :debug
 
 #
 # Testing classes
@@ -34,7 +36,7 @@ class SubSubPlugin < SubPlugin; end
 #
 # Examples
 #
-describe Pluggability do
+RSpec.describe Pluggability do
 
 	before( :each ) do
 		Plugin.plugin_exclusions = []
@@ -101,9 +103,9 @@ describe Pluggability do
 				at_least( :once ).
 				and_return( ['/some/path/to/plugins/dazzle.rb'] )
 			expect( Kernel ).to receive( :require ).with( '/some/path/to/plugins/dazzle.rb' ) do |*args|
-				loaded_class = Class.new( Plugin )
-				# Simulate a named class, since we're not really requiring
-				Plugin.derivatives['dazzle'] = loaded_class
+				loaded_class = Class.new( Plugin ) do
+					set_temporary_name 'Plugin::Dazzle (testing class)'
+				end
 				true
 			end
 
@@ -120,9 +122,10 @@ describe Pluggability do
 			expect( Kernel ).to receive( :require ) do |require_path|
 				expect( require_path ).to eq( '/some/path/to/plugins/razzle_dazzle.rb' )
 
-				loaded_class = Class.new( Plugin )
-				# Simulate a named class, since we're not really requiring
-				Plugin.derivatives['razzledazzle'] = loaded_class
+				loaded_class = Class.new( Plugin ) do
+					set_temporary_name 'Plugin::RazzleDazzle (testing class)'
+				end
+
 				true
 			end
 

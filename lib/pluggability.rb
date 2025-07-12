@@ -137,15 +137,28 @@ module Pluggability
 			return base.name
 		end
 	end
-	alias factory_type plugin_type
+	alias_method :factory_type, :plugin_type
 
 
 	### Inheritance callback -- Register subclasses in the derivatives hash
 	### so that ::create knows about them.
 	def inherited( subclass )
-		plugin_class = Pluggability.plugin_base_class( subclass )
+		Pluggability.log.debug "  %p inherited by %p" % [ self, subclass ]
+		self.register_plugin_type( subclass )
+		super
+	end
 
-		Pluggability.logger.debug "%p inherited by %p" % [ plugin_class, subclass ]
+
+	### (Undocumented)
+	def set_temporary_name( new_name )
+		super
+		self.register_plugin_type( self )
+	end
+
+
+	### (Undocumented)
+	def register_plugin_type( subclass )
+		plugin_class = Pluggability.plugin_base_class( subclass )
 		keys = [ subclass ]
 
 		# If it's not an anonymous class, make some keys out of variants of its name
@@ -169,9 +182,7 @@ module Pluggability
 		class << subclass
 			attr_reader :plugin_name
 		end
-		subclass.instance_variable_set( :@plugin_name, keys.last )
-
-		super
+		self.instance_variable_set( :@plugin_name, keys.last )
 	end
 
 
@@ -180,19 +191,15 @@ module Pluggability
 	def make_derivative_names( subclass )
 		keys = []
 
-		simple_name = subclass.name.sub( /^.*::/i, '' ).sub( /\W+$/, '' )
+		simple_name = subclass.name.sub( /\A.*::/, '' ).sub( /\A(\w+).*/, '\\1' )
 		keys << simple_name << simple_name.downcase
 		keys << simple_name.uncamelcase.downcase
 
-		# Handle class names like 'FooBar' for 'Bar' factories.
-		Pluggability.log.debug "Inherited %p for %p-type plugins" % [ subclass, self.plugin_type ]
-		if subclass.name.match( /(?:.*::)?(\w+)(?:#{self.plugin_type})/i )
-			keys << Regexp.last_match[1].downcase
-		else
-			keys << subclass.name.sub( /.*::/, '' ).downcase
-		end
+		simpler_name = simple_name.sub( /(?:#{self.plugin_type})\z/, '' )
+		keys << simpler_name << simpler_name.downcase
+		keys << simpler_name.uncamelcase.downcase
 
-		return keys
+		return keys.uniq
 	end
 
 
